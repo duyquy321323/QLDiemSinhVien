@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { api } from "../../api";
 import { useNavigate, useParams } from "react-router-dom";
+import dayjs from 'dayjs';
 
 const ThemSuaSinhVien = () => {
 
@@ -38,7 +39,7 @@ const ThemSuaSinhVien = () => {
             setFormData({
                 idSinhVien: student.idSinhVien || "",
                 hoTen: student.hoTen || "",
-                ngaySinh: student.ngaySinh || "",
+                ngaySinh: dayjs(student.ngaySinh).format("YYYY-MM-DD") || "",
                 diaChi: student.diaChi || "",
                 gioiTinh: student.gioiTinh ?? "-1",
                 maLop: student.maLop?.idLopHoc || "",

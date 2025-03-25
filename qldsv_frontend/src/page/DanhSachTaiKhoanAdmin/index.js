@@ -91,13 +91,13 @@ import { api } from "../../api";
                 </TableHead>
                 <TableBody>
                   {paginatedStudents.map((row) => (
-                    <StyledTableRow key={row.idLopHoc}>
+                    <StyledTableRow key={row.idTaiKhoan}>
                       <StyledTableCell component="th" scope="row">
                         {row.idTaiKhoan}
                       </StyledTableCell>
                       <StyledTableCell align="right">{row.tenTaiKhoan}</StyledTableCell>
                       <StyledTableCell align="center">
-                        {row.chucVu.tenloaitaikhoan}
+                        {Array.from(row.chucVu).length > 0 ? Array.from(row.chucVu).at(0) : ""}
                       </StyledTableCell>
                     </StyledTableRow>
                   ))}

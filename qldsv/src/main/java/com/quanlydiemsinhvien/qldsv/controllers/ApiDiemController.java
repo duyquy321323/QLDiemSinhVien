@@ -54,7 +54,7 @@ public class ApiDiemController {
     @RequestMapping("/TrungBinhDiemHe4/")
     @CrossOrigin
     public ResponseEntity<Double> DiemtrungbinhSvHe4(@RequestParam Map<String, String> params) {
-        return new ResponseEntity<>((this.diemService.getDiemTrungBinh(params) / 4), HttpStatus.OK);
+        return new ResponseEntity<>((this.diemService.getDiemTrungBinh(params)*0.4), HttpStatus.OK);
     }
 //
     @RequestMapping("/DanhSachDiem/")

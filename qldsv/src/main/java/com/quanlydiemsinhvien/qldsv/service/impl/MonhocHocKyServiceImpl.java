@@ -9,6 +9,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.quanlydiemsinhvien.qldsv.converter.MonHocHocKyConverter;
 import com.quanlydiemsinhvien.qldsv.pojo.Hocky;
+import com.quanlydiemsinhvien.qldsv.pojo.Monhoc;
+import com.quanlydiemsinhvien.qldsv.pojo.MonhocHocky;
 import com.quanlydiemsinhvien.qldsv.repository.HocKyRepository;
 import com.quanlydiemsinhvien.qldsv.repository.MonHocRepository;
 import com.quanlydiemsinhvien.qldsv.repository.MonhocHockyRepository;
@@ -50,6 +52,14 @@ public class MonhocHocKyServiceImpl implements MonhocHocKyService {
         try {
             Hocky hocky = hocKyRepository.findById(idHK).orElse(null);
             monHocHockyRepository.saveAll(requests.stream().filter(it -> it.getNgayBatDau() != null).collect(Collectors.toList()).stream().map(it -> monHocHocKyConverter.monhocHockyCreateRequestToMonHocHocKy(it, hocky)).collect(Collectors.toList()));
+            List<MonHocHocKyCreateRequest> monhocHockyDeleteList = requests.stream().filter(it -> it.getNgayBatDau() == null).collect(Collectors.toList());
+            for(MonHocHocKyCreateRequest mhhk : monhocHockyDeleteList){
+                Monhoc monhoc = monHocRepository.findById(mhhk.getIdMonHoc()).orElse(null);
+                MonhocHocky mhhkdb = monHocHockyRepository.findByIdMonHocAndIdHocky_IdHocKy(monhoc, idHK);
+                if(mhhkdb != null){
+                    monHocHockyRepository.delete(mhhkdb);
+                }
+            }
 
         } catch (Exception e) {
             e.printStackTrace();

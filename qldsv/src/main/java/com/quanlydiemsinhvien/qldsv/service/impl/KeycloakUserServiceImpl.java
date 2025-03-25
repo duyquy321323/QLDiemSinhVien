@@ -2,6 +2,7 @@ package com.quanlydiemsinhvien.qldsv.service.impl;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -33,6 +34,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.quanlydiemsinhvien.qldsv.dto.GiangVienDTO;
 import com.quanlydiemsinhvien.qldsv.dto.SinhVienDTO;
@@ -351,4 +353,100 @@ public boolean deleteUser(String userId) {
 
         return response.getBody().get("access_token").toString();
     }
+
+    @Override
+    public String getUsernameByUserId(String userId) {
+        try {
+            String url = String.format("%s/admin/realms/%s/users/%s", serverUrl, realm, userId);
+    
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.setBearerAuth(getAdminAccessToken());
+    
+            HttpEntity<Void> request = new HttpEntity<>(headers);
+            ResponseEntity<String> response = new RestTemplate().exchange(url, HttpMethod.GET, request, String.class);
+    
+            if (response.getStatusCode() == HttpStatus.OK) {
+                ObjectMapper objectMapper = new ObjectMapper();
+                Map<String, Object> userMap = objectMapper.readValue(response.getBody(), new TypeReference<>() {});
+    
+                return userMap.get("username").toString(); // Trả về username
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null; // Trả về null nếu không tìm thấy hoặc có lỗi xảy ra
+    }
+
+   @Override
+public List<String> getUserRoles(String userId) {
+    try {
+        String url = String.format("%s/admin/realms/%s/users/%s/role-mappings", serverUrl, realm, userId);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setBearerAuth(getAdminAccessToken());
+
+        HttpEntity<String> request = new HttpEntity<>(headers);
+        ResponseEntity<String> response = new RestTemplate().exchange(url, HttpMethod.GET, request, String.class);
+
+        if (response.getStatusCode() == HttpStatus.OK) {
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode root = objectMapper.readTree(response.getBody());
+
+            List<String> roleNames = new ArrayList<>();
+
+            // Lấy danh sách realm roles
+            if (root.has("realmMappings")) {
+                for (JsonNode role : root.get("realmMappings")) {
+                    roleNames.add(role.get("name").asText());
+                }
+            }
+
+            // Lấy danh sách client roles
+            if (root.has("clientMappings")) {
+                JsonNode clientMappings = root.get("clientMappings");
+                for (JsonNode client : clientMappings) {
+                    if (client.has("mappings")) {
+                        for (JsonNode role : client.get("mappings")) {
+                            roleNames.add(role.get("name").asText());
+                        }
+                    }
+                }
+            }
+
+            return roleNames;
+        }
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+    return Collections.emptyList();
+}
+
+
+@Override
+public String getUserIdByUsername(String username) {
+    try {
+        String url = String.format("%s/admin/realms/%s/users?username=%s", serverUrl, realm, username);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setBearerAuth(getAdminAccessToken()); // Lấy token admin
+
+        HttpEntity<String> request = new HttpEntity<>(headers);
+        ResponseEntity<String> response = new RestTemplate().exchange(url, HttpMethod.GET, request, String.class);
+
+        if (response.getStatusCode() == HttpStatus.OK) {
+            ObjectMapper objectMapper = new ObjectMapper();
+            List<Map<String, Object>> users = objectMapper.readValue(response.getBody(), new TypeReference<>() {});
+
+            if (!users.isEmpty()) {
+                return users.get(0).get("id").toString(); // Lấy userId của user đầu tiên
+            }
+        }
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+    return null; // Trả về null nếu không tìm thấy
+}
 }

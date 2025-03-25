@@ -11,8 +11,6 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
@@ -42,11 +40,11 @@ public class Taikhoan implements Serializable {
     @Id
     private String idTaiKhoan;
 
-    @Column(nullable = false, length = 50)
-    private String tenTaiKhoan;
+    // @Column(nullable = false, length = 50)
+    // private String tenTaiKhoan;
 
-    @Column(name = "MatKhau", nullable = false, length = 100)
-    private String matKhau;
+    // @Column(name = "MatKhau", nullable = false, length = 100)
+    // private String matKhau;
 
     @Column(length = 1000)
     private String image;
@@ -54,9 +52,9 @@ public class Taikhoan implements Serializable {
     @OneToMany(mappedBy = "idTaiKhoan", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Traloidiendan> traloidiendanSet;
 
-    @JoinColumn(name = "ChucVu", nullable = false)
-    @ManyToOne
-    private Loaitaikhoan chucVu;
+    // @JoinColumn(name = "ChucVu", nullable = false)
+    // @ManyToOne
+    // private Loaitaikhoan chucVu;
 
     @OneToMany(mappedBy = "idTaiKhoan", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Cauhoidiendang> cauhoidiendangSet;

@@ -6,13 +6,11 @@ package com.quanlydiemsinhvien.qldsv.service.impl;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -31,11 +29,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
@@ -53,13 +47,12 @@ import com.quanlydiemsinhvien.qldsv.converter.SinhVienConverter;
 import com.quanlydiemsinhvien.qldsv.converter.TaiKhoanConverter;
 import com.quanlydiemsinhvien.qldsv.dto.TaiKhoanDTO;
 import com.quanlydiemsinhvien.qldsv.pojo.Giangvien;
-import com.quanlydiemsinhvien.qldsv.pojo.Loaitaikhoan;
 import com.quanlydiemsinhvien.qldsv.pojo.Sinhvien;
 import com.quanlydiemsinhvien.qldsv.pojo.Taikhoan;
 import com.quanlydiemsinhvien.qldsv.repository.GiangvienRepository;
-import com.quanlydiemsinhvien.qldsv.repository.LoaitaikhoanRepository;
 import com.quanlydiemsinhvien.qldsv.repository.SinhVienRepository;
 import com.quanlydiemsinhvien.qldsv.repository.TaiKhoanRepository;
+import com.quanlydiemsinhvien.qldsv.request.LoginRequest;
 import com.quanlydiemsinhvien.qldsv.request.TaiKhoanGiangVienRequest;
 import com.quanlydiemsinhvien.qldsv.request.TaikhoanCreateRequest;
 import com.quanlydiemsinhvien.qldsv.service.KeycloakUserService;
@@ -69,15 +62,15 @@ import com.quanlydiemsinhvien.qldsv.service.TaiKhoanService;
  *
  * @author Admin
  */
-@Service("userDetailsService")
+@Service
 @Transactional
 public class TaiKhoanServiceImpl implements TaiKhoanService {
 
     @Autowired
     private Cloudinary cloudinary;
 
-    @Autowired
-    private LoaitaikhoanRepository loaitaikhoanRepository;
+    // @Autowired
+    // private LoaitaikhoanRepository loaitaikhoanRepository;
 
     @Autowired
     private GiangvienRepository giangvienRepository;
@@ -97,8 +90,6 @@ public class TaiKhoanServiceImpl implements TaiKhoanService {
     @Autowired
     private VerificationCodeStore verificationCodeStore;
 
-    @Autowired
-    private BCryptPasswordEncoder passwordEncoder;
     @Value("${keycloak.url}")
     private String keycloakLink;
     @Value("${keycloak.client-secret}")
@@ -130,45 +121,45 @@ public class TaiKhoanServiceImpl implements TaiKhoanService {
         return taikhoanRepository.save(tk);
     }
 
-    @Override
-    public boolean addAcount(Taikhoan t) {
-        String pass = t.getMatKhau();
-        t.setMatKhau(this.passwordEncoder.encode(pass));
-        Loaitaikhoan chucvu = loaitaikhoanRepository.findByTenloaitaikhoan("ROLE_SV")
-                .orElseThrow(() -> new RuntimeException("Loại tài khoản không tồn tại!"));
-        t.setChucVu(chucvu);
+    // @Override
+    // public boolean addAcount(Taikhoan t) {
+    //     String pass = t.getMatKhau();
+    //     t.setMatKhau(this.passwordEncoder.encode(pass));
+    //     Loaitaikhoan chucvu = loaitaikhoanRepository.findByTenloaitaikhoan("ROLE_SV")
+    //             .orElseThrow(() -> new RuntimeException("Loại tài khoản không tồn tại!"));
+    //     t.setChucVu(chucvu);
 
-        if (t.getXacNhanMk() == null || t.getTenTaiKhoan() == null || t.getMatKhau() == null) {
-            return false;
-        }
-        try {
-            Sinhvien p = sinhVienRepository.findByEmail(t.getTenTaiKhoan()).orElse(null);
-            if (!p.getMaXacNhan().equals(t.getMaXacNhan()))
-                return false;
-            if (p.getIdTaiKhoan() == null && p.getEmail() != null) {
-                p.setIdTaiKhoan(t);
-                sinhVienRepository.save(p);
-                return true;
-            }
-        } catch (Exception ex) {
-            // Không tìm thấy kết quả
-            ex.printStackTrace();
-        }
-        return false;
-    }
+    //     if (t.getXacNhanMk() == null || t.getTenTaiKhoan() == null || t.getMatKhau() == null) {
+    //         return false;
+    //     }
+    //     try {
+    //         Sinhvien p = sinhVienRepository.findByEmail(t.getTenTaiKhoan()).orElse(null);
+    //         if (!p.getMaXacNhan().equals(t.getMaXacNhan()))
+    //             return false;
+    //         if (p.getIdTaiKhoan() == null && p.getEmail() != null) {
+    //             p.setIdTaiKhoan(t);
+    //             sinhVienRepository.save(p);
+    //             return true;
+    //         }
+    //     } catch (Exception ex) {
+    //         // Không tìm thấy kết quả
+    //         ex.printStackTrace();
+    //     }
+    //     return false;
+    // }
 
     @Override
     public boolean addAcountGV(TaiKhoanGiangVienRequest t) {
         SimpleMailMessage message = new SimpleMailMessage();
 
         // Kiểm tra xem tên tài khoản có bị trùng không
-        long duplicateCount = taikhoanRepository.countByTenTaiKhoan(t.getTenTaiKhoan());
+        // long duplicateCount = taikhoanRepository.countByTenTaiKhoan(t.getTenTaiKhoan());
 
         // Lấy giảng viên từ repository
         Optional<Giangvien> gvOptional = giangvienRepository.findById(t.getIdGiangVien());
 
         try {
-            if (duplicateCount == 0 && gvOptional.isPresent()) {
+            if (gvOptional.isPresent()) {
 
                 Giangvien gv = gvOptional.get();
                 if (gv.getIdTaiKhoan() == null) {// Tạo tài khoản trên Keycloak trước khi lưu sinh viên
@@ -179,8 +170,7 @@ public class TaiKhoanServiceImpl implements TaiKhoanService {
                         return false; // Nếu tạo tài khoản trên Keycloak thất bại thì không lưu vào database
                     }
                     gv.setIdTaiKhoan(Taikhoan.builder()
-                    .chucVu(loaitaikhoanRepository.findByTenloaitaikhoan("ROLE_GV").orElse(null))
-                    .idTaiKhoan(keycloakUserId).tenTaiKhoan(gv.getEmail()).matKhau("321323").build());
+                    .idTaiKhoan(keycloakUserId).build());
                     giangvienRepository.save(gv);
                 }
                 // Gửi email thông báo
@@ -205,31 +195,31 @@ public class TaiKhoanServiceImpl implements TaiKhoanService {
         return taikhoanRepository.findAll(pageRequest).toList();
     }
 
-    @Override
-    public Taikhoan getUserByUsername(String username) {
-        return taikhoanRepository.findByTenTaiKhoan(username).orElse(null);
-    }
+    // @Override
+    // public Taikhoan getUserByUsername(String username) {
+    //     return taikhoanRepository.findByTenTaiKhoan(username).orElse(null);
+    // }
 
-    // Dang Nhap
-    @Override
-    public UserDetails loadUserByUsername(String tenTK) throws UsernameNotFoundException {
-        Taikhoan taikhoans = this.getUserByUsername(tenTK);
-        if (taikhoans == null) {
-            throw new UsernameNotFoundException("Tài khoản không tồn tại!!!");
-        }
+    // // Dang Nhap
+    // @Override
+    // public UserDetails loadUserByUsername(String tenTK) throws UsernameNotFoundException {
+    //     Taikhoan taikhoans = this.getUserByUsername(tenTK);
+    //     if (taikhoans == null) {
+    //         throw new UsernameNotFoundException("Tài khoản không tồn tại!!!");
+    //     }
 
-        Set<GrantedAuthority> auth = new HashSet<>();
-        auth.add(new SimpleGrantedAuthority(taikhoans.getChucVu().getTenloaitaikhoan()));
-        return new org.springframework.security.core.userdetails.User(taikhoans.getTenTaiKhoan(),
-                taikhoans.getMatKhau(), auth);
-    }
+    //     Set<GrantedAuthority> auth = new HashSet<>();
+    //     auth.add(new SimpleGrantedAuthority(taikhoans.getChucVu().getTenloaitaikhoan()));
+    //     return new org.springframework.security.core.userdetails.User(taikhoans.getTenTaiKhoan(),
+    //             taikhoans.getMatKhau(), auth);
+    // }
 
     @Override
     public boolean createTKSinhVien(Map<String, String> params) {
         String maXN = params.get("maXacNhan");
         String email = params.get("tenTaiKhoan");
-        Loaitaikhoan loaitaikhoan = loaitaikhoanRepository.findByTenloaitaikhoan("ROLE_SV")
-                .orElseThrow(() -> new RuntimeException("Loại tài khoản không tồn tại"));
+        // Loaitaikhoan loaitaikhoan = loaitaikhoanRepository.findByTenloaitaikhoan("ROLE_SV")
+        //         .orElseThrow(() -> new RuntimeException("Loại tài khoản không tồn tại"));
         Sinhvien sinhvien = sinhVienRepository.findByEmail(params.get("tenTaiKhoan"))
                 .orElseThrow(() -> new RuntimeException("Sinh viên không tồn tại"));
         String mk = params.get("matKhau");
@@ -244,10 +234,9 @@ public class TaiKhoanServiceImpl implements TaiKhoanService {
                 }
                 keycloakUserService.updateUserPassword(keycloakUserId, mk);
                 Taikhoan u = Taikhoan.builder()
-                        .tenTaiKhoan(sinhvien.getEmail())
                         .maXacNhan(Integer.parseInt(maXN))
-                        .matKhau(mk)
-                        .chucVu(loaitaikhoan)
+                        // .matKhau(mk)
+                        // .chucVu(loaitaikhoan)
                         .idTaiKhoan(keycloakUserId)
                         .build();
                 if (sinhvien.getIdTaiKhoan() == null && sinhvien.getEmail() != null
@@ -273,31 +262,29 @@ public class TaiKhoanServiceImpl implements TaiKhoanService {
         return (UserDetails) authentication.getPrincipal();
     }
 
-    @Override
-    public String GetIdTaiKhoan(UserDetails userDetails) {
-        Taikhoan taikhoans = this.getUserByUsername(userDetails.getUsername());
+    // @Override
+    // public String GetIdTaiKhoan(UserDetails userDetails) {
+    //     Taikhoan taikhoans = this.getUserByUsername(userDetails.getUsername());
 
-        return taikhoans.getIdTaiKhoan();
-    }
+    //     return taikhoans.getIdTaiKhoan();
+    // }
 
     @Override
-    public Taikhoan thayDoiMatKhau(Map<String, String> params) {
-        Taikhoan tk = taikhoanRepository.findByTenTaiKhoan(params.get("tenTaiKhoan"))
-        .orElseThrow(() -> new RuntimeException("Tài khoản không tồn tại!"));
-        if(!keycloakUserService.checkOldPassword(tk.getTenTaiKhoan(), params.get("matKhau"))){
-            return null;
+    public ResponseEntity<?> thayDoiMatKhau(Map<String, String> params) {
+        String userId = keycloakUserService.getUserIdByUsername(params.get("tenTaiKhoan"));
+        if(!keycloakUserService.checkOldPassword(params.get("tenTaiKhoan"), params.get("matKhau"))){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        if(!keycloakUserService.updateUserPassword(tk.getIdTaiKhoan(), params.get("matKhauMoi"))){
-            return null;
+        if(!keycloakUserService.updateUserPassword(userId, params.get("matKhauMoi"))){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        this.taikhoanRepository.save(tk);
-        return tk;
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     @Override
     public void thayDoiMatKhauAD(TaikhoanCreateRequest user) {
         Taikhoan taikhoan = user.getIdTaiKhoan() == null? null : taikhoanRepository.findById(user.getIdTaiKhoan()).orElse(null);
-        if(taikhoan == null || !keycloakUserService.checkOldPassword( taikhoan.getTenTaiKhoan(), user.getMatKhau())){
+        if(taikhoan == null || !keycloakUserService.checkOldPassword(keycloakUserService.getUsernameByUserId(taikhoan.getIdTaiKhoan()), user.getMatKhau())){
             throw new RuntimeException("Thay đổi mật khẩu thất bại!");
         }
         if (keycloakUserService.updateUserPassword(user.getIdTaiKhoan(), user.getMkMoi())) {
@@ -307,7 +294,7 @@ public class TaiKhoanServiceImpl implements TaiKhoanService {
     }
 
     @Override
-    public Map<String, String> login(Taikhoan user) {
+    public Map<String, String> login(LoginRequest user) {
         try {
             String keycloakUrl = keycloakLink + "/protocol/openid-connect/token";
 
@@ -345,12 +332,12 @@ public class TaiKhoanServiceImpl implements TaiKhoanService {
         return null;
     }
 
-    @Override
-    public boolean authUser(String username, String password) {
-        Taikhoan taikhoan = taikhoanRepository.findByTenTaiKhoan(username)
-                .orElseThrow(() -> new RuntimeException("Tài khoản không tồn tại!"));
-        return this.passwordEncoder.matches(password, taikhoan.getMatKhau());
-    }
+    // @Override
+    // public boolean authUser(String username, String password) {
+    //     Taikhoan taikhoan = taikhoanRepository.findByTenTaiKhoan(username)
+    //             .orElseThrow(() -> new RuntimeException("Tài khoản không tồn tại!"));
+    //     return this.passwordEncoder.matches(password, taikhoan.getMatKhau());
+    // }
 
     @Override
     public TaiKhoanDTO getUserById(String id) {
@@ -381,37 +368,37 @@ public class TaiKhoanServiceImpl implements TaiKhoanService {
         }
     }
 
-    public List<Loaitaikhoan> getLoaitaikhoanList(Map<String, String> params) {
-        try {
-            String tenSV = params.get("tenLTK");
-            return loaitaikhoanRepository.findByTenloaitaikhoanContaining(tenSV);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            return null;
-        }
-    }
+    // public List<Loaitaikhoan> getLoaitaikhoanList(Map<String, String> params) {
+    //     try {
+    //         String tenSV = params.get("tenLTK");
+    //         return loaitaikhoanRepository.findByTenloaitaikhoanContaining(tenSV);
+    //     } catch (Exception ex) {
+    //         ex.printStackTrace();
+    //         return null;
+    //     }
+    // }
 
-    @Override
-    public Loaitaikhoan getLoaiTaiKhoanById(int id) {
-        try {
-            return loaitaikhoanRepository.findById(id)
-                    .orElseThrow(() -> new RuntimeException("Loại tài khoản không tồn tại!"));
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            return null;
-        }
-    }
+    // @Override
+    // public Loaitaikhoan getLoaiTaiKhoanById(int id) {
+    //     try {
+    //         return loaitaikhoanRepository.findById(id)
+    //                 .orElseThrow(() -> new RuntimeException("Loại tài khoản không tồn tại!"));
+    //     } catch (Exception ex) {
+    //         ex.printStackTrace();
+    //         return null;
+    //     }
+    // }
 
-    @Override
-    public boolean addOrUpdateLoaiTK(Loaitaikhoan ltk) {
-        try {
-            loaitaikhoanRepository.save(ltk);
-            return true;
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            return false;
-        }
-    }
+    // @Override
+    // public boolean addOrUpdateLoaiTK(Loaitaikhoan ltk) {
+    //     try {
+    //         loaitaikhoanRepository.save(ltk);
+    //         return true;
+    //     } catch (Exception ex) {
+    //         ex.printStackTrace();
+    //         return false;
+    //     }
+    // }
 
     @Override
     public long countTaiKhoan() {

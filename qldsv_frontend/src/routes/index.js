@@ -1,3 +1,4 @@
+import { useSelector } from "react-redux";
 import { Navigate, useRoutes } from "react-router-dom";
 import LayoutAdmin from "../layout/LayoutAdmin";
 import LayoutUser from "../layout/LayoutUser";
@@ -23,7 +24,6 @@ import KhoaHocAdmin from "../page/KhoaHocAdmin";
 import LoginAdmin from "../page/LoginAdmin";
 import Login from "../page/LoginUser";
 import LopHocAdmin from "../page/LopHocAdmin";
-import LoaiTaiKhoanAdmin from "../page/LoaiTaiKhoanAdmin";
 import MonHocAdmin from "../page/MonHocAdmin";
 import NhapDiem from "../page/NhapDiem";
 import NhapDiemSinhVien from "../page/NhapDiemSinhVien";
@@ -47,10 +47,10 @@ import ThongTinTaiKhoanAdmin from "../page/ThongTinTaiKhoanAdmin";
 import TimSinhVien from "../page/TimSinhVien";
 import TraLoiDienDan from "../page/TraLoiDienDan";
 import XemDiem from "../page/XemDiem";
-import { useSelector } from "react-redux";
 
 const Routes = () => {
     const user = useSelector(state => state.accountReducer);
+    console.log(user)
     const routes = useRoutes([
         {
             path: '/',
@@ -58,7 +58,7 @@ const Routes = () => {
             children: [
                 {
                     index: true,
-                    element: user? (user?.chucVu?.tenloaitaikhoan === 'ROLE_GVU'? <Navigate to="/giaovu/home"/> : <Navigate to="/home"/>) : <Navigate to="/auth-option" replace />
+                    element: user? (Array.from(user.chucVu).includes('GVU')? <Navigate to="/giaovu/home"/> : <Navigate to="/home"/>) : <Navigate to="/auth-option" replace />
                 },
                 {
                     path: '/home',
@@ -144,7 +144,7 @@ const Routes = () => {
         },
         {
             path: '/giaovu',
-            element: user?.chucVu?.tenloaitaikhoan === 'ROLE_GVU' ? <LayoutAdmin/> : <Navigate to="/home" replace />,
+            element: user? (Array.from(user.chucVu).includes('GVU') ? <LayoutAdmin/> : <Navigate to="/home" replace />) : <Navigate to="/auth-option" replace />,
             children: [
                 {
                     path: '/giaovu/home',

@@ -10,12 +10,11 @@ import java.util.Map;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.quanlydiemsinhvien.qldsv.dto.TaiKhoanDTO;
-import com.quanlydiemsinhvien.qldsv.pojo.Loaitaikhoan;
 import com.quanlydiemsinhvien.qldsv.pojo.Taikhoan;
+import com.quanlydiemsinhvien.qldsv.request.LoginRequest;
 import com.quanlydiemsinhvien.qldsv.request.TaiKhoanGiangVienRequest;
 import com.quanlydiemsinhvien.qldsv.request.TaikhoanCreateRequest;
 
@@ -23,25 +22,25 @@ import com.quanlydiemsinhvien.qldsv.request.TaikhoanCreateRequest;
  *
  * @author Admin
  */
-public interface TaiKhoanService extends UserDetailsService {
+public interface TaiKhoanService {
    Taikhoan updateImg(Map<String, String> params, MultipartFile avatar);  
-   boolean addAcount(Taikhoan t);
+//    boolean addAcount(TaikhoanDTO t);
     boolean addAcountGV(TaiKhoanGiangVienRequest t);
     List<Taikhoan> getTaiKhoans(Map<String, String> params);
-    Taikhoan getUserByUsername(String username);
+    // Taikhoan getUserByUsername(String username);
     UserDetails getLoggedInUserDetails(Authentication authentication);
     boolean createTKSinhVien(Map<String, String> params);
-    String GetIdTaiKhoan(UserDetails userDetails);
-    Taikhoan thayDoiMatKhau(Map<String, String> params);
+    // String GetIdTaiKhoan(UserDetails userDetails);
+    public ResponseEntity<?> thayDoiMatKhau(Map<String, String> params);
     void thayDoiMatKhauAD(TaikhoanCreateRequest user);
-    public Map<String, String> login(Taikhoan user);
-    boolean authUser(String username, String password);
+    public Map<String, String> login(LoginRequest user);
+    // boolean authUser(String username, String password);
     TaiKhoanDTO getUserById(String id);
     boolean sendCode(String email);
 
-    List<Loaitaikhoan> getLoaitaikhoanList(Map<String, String> params);
-    Loaitaikhoan getLoaiTaiKhoanById(int id);
-    boolean addOrUpdateLoaiTK(Loaitaikhoan ltk);
+    // List<Loaitaikhoan> getLoaitaikhoanList(Map<String, String> params);
+    // Loaitaikhoan getLoaiTaiKhoanById(int id);
+    // boolean addOrUpdateLoaiTK(Loaitaikhoan ltk);
     long countTaiKhoan();
     ResponseEntity<String> logout(String authHeader);
 }

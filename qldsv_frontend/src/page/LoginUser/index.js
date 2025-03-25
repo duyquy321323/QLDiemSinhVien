@@ -27,7 +27,7 @@ const Login = () => {
         cookie.save("refresh_token", res.data.refresh_token);
         let { data } = await api().get(endpoints["current-user"]);
         cookie.save("user", data);
-        if (data.chucVu.tenloaitaikhoan === "ROLE_SV") {
+        if (data && data.chucVu && Array.from(data.chucVu).includes("SV")) {
           let sinhvien = await api().get(endpoints["current-sinhvien"]);
           cookie.save("sinhvien", sinhvien.data);
           dispatch({

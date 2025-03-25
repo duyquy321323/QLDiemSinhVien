@@ -14,6 +14,7 @@ const DangKiMonHoc = () => {
   const [phonghoc, setPhonghoc] = useState([]);
   const [disabledSubjects, setDisabledSubjects] = useState({});
   const [giangvien, setGiangvien] = useState([]);
+  const [startDate, setStartDate] = useState("");
   const [mondachon, setMondachon] = useState([]);
   const { id } = useParams('id');
 
@@ -78,7 +79,7 @@ const DangKiMonHoc = () => {
     mondachon.forEach((item) => {
       const startDate = dayjs(item.ngayBatDau);
       const endDate = dayjs(item.ngayKetThuc);
-      const isWithinDateRange = today.isAfter(startDate) && today.isBefore(endDate);
+      const isWithinDateRange = today.isAfter(startDate);
   
       initialCheckedState[item.idMonHoc.idMonHoc] = true;
       initialDisabledState[item.idMonHoc.idMonHoc] = isWithinDateRange;
@@ -117,20 +118,33 @@ const DangKiMonHoc = () => {
   async function onSubmit(data){
     const formattedData = Object.keys(data).reduce((acc, key) => {
       const [field, id] = key.split("_"); // Tách field và id môn học
+  
+      if (disabledSubjects[id]) {
+        return acc; // Bỏ qua các môn học bị disable
+      }
+  
       if (!acc[id]) acc[id] = { idMonHoc: id };
       acc[id][field] = data[key];
       return acc;
     }, {});
   
     // Chuyển từ object về array
-    const payload = Object.values(formattedData);
+    let payload = Object.values(formattedData);
+    payload = payload.filter(item => item.ngayBatDau);
+    if (payload.length === 0) {
+      window.alert("Không có môn học hợp lệ để gửi!");
+      return;
+    }
   
     try{
       await api().post(`/giaovu/dangkymonhoc/${id}`, payload);
+      window.alert('Cập nhật thành công!!!')
     } catch (e){
       console.error(e);
     }
   }
+
+  const today = new Date().toISOString().split("T")[0];
 
   return (
     <form className="container--form__dkmh" onSubmit={handleSubmit(onSubmit)}>
@@ -182,7 +196,11 @@ const DangKiMonHoc = () => {
                   name={`ngayBatDau_${mh.idMonHoc}`}
                   control={control}
                   defaultValue=""
-                  render={({ field }) => <TextField {...field} type="date" required={checkedSubjects[mh.idMonHoc] || false} // Required nếu checked
+                  render={({ field }) => <TextField {...field} inputProps={{ min: today }} onChange={(e) => {
+                    const selectedDate = e.target.value;
+                    setStartDate(selectedDate);
+                    field.onChange(selectedDate);
+                  }} type="date" required={checkedSubjects[mh.idMonHoc] || false} // Required nếu checked
                   disabled={!checkedSubjects[mh.idMonHoc] || disabledSubjects[mh.idMonHoc]} />}
                 />
               </td>
@@ -192,7 +210,10 @@ const DangKiMonHoc = () => {
                   name={`ngayKetThuc_${mh.idMonHoc}`}
                   control={control}
                   defaultValue=""
-                  render={({ field }) => <TextField {...field} type="date" required={checkedSubjects[mh.idMonHoc] || false} // Required nếu checked
+                  render={({ field }) => <TextField {...field} 
+                  inputProps={{
+                    min: startDate ? new Date(new Date(startDate).setMonth(new Date(startDate).getMonth() + 2)).toISOString().split("T")[0] : today,
+                  }} type="date" required={checkedSubjects[mh.idMonHoc] || false} // Required nếu checked
                   disabled={!checkedSubjects[mh.idMonHoc] || disabledSubjects[mh.idMonHoc]} />}
                 />
               </td>

@@ -1,17 +1,17 @@
-package com.quanlydiemsinhvien.qldsv.dto;
+// package com.quanlydiemsinhvien.qldsv.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+// import lombok.AllArgsConstructor;
+// import lombok.Builder;
+// import lombok.Getter;
+// import lombok.NoArgsConstructor;
+// import lombok.Setter;
 
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-@Setter
-@Getter
-public class LoaitaikhoanDTO {
-    private Integer idloaitaikhoan;
-    private String tenloaitaikhoan;
-}
+// @Builder
+// @NoArgsConstructor
+// @AllArgsConstructor
+// @Setter
+// @Getter
+// public class LoaitaikhoanDTO {
+//     private Integer idloaitaikhoan;
+//     private String tenloaitaikhoan;
+// }

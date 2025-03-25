@@ -26,6 +26,7 @@ import com.quanlydiemsinhvien.qldsv.dto.GiangVienDTO;
 import com.quanlydiemsinhvien.qldsv.dto.SinhVienDTO;
 import com.quanlydiemsinhvien.qldsv.dto.TaiKhoanDTO;
 import com.quanlydiemsinhvien.qldsv.pojo.Taikhoan;
+import com.quanlydiemsinhvien.qldsv.request.LoginRequest;
 import com.quanlydiemsinhvien.qldsv.service.GiangVienService;
 import com.quanlydiemsinhvien.qldsv.service.SinhVienService;
 import com.quanlydiemsinhvien.qldsv.service.TaiKhoanService;
@@ -47,7 +48,7 @@ public class ApiUserController {
 
     @PostMapping("/login/")
     @CrossOrigin
-    public ResponseEntity<Map<String,String>> login(@RequestBody Taikhoan user) {
+    public ResponseEntity<Map<String,String>> login(@RequestBody LoginRequest user) {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(tkService.login(user));
@@ -68,11 +69,7 @@ public class ApiUserController {
     @PostMapping("/change-password/")
     @CrossOrigin
     public ResponseEntity<?> changePassword(@RequestParam Map<String, String> params) {
-            if(tkService.thayDoiMatKhau(params) != null){
-                return ResponseEntity.status(HttpStatus.OK).build();
-            } else {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-            }
+            return tkService.thayDoiMatKhau(params);
     }
 
     @GetMapping(path = "/current-user/", produces = MediaType.APPLICATION_JSON_VALUE)

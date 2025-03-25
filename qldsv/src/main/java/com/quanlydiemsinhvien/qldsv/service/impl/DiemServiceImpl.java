@@ -36,6 +36,7 @@ import com.quanlydiemsinhvien.qldsv.pojo.Diem;
 import com.quanlydiemsinhvien.qldsv.pojo.DiemMonHoc;
 import com.quanlydiemsinhvien.qldsv.pojo.DiemMonHocComparator;
 import com.quanlydiemsinhvien.qldsv.pojo.Giangvien;
+import com.quanlydiemsinhvien.qldsv.pojo.Hocky;
 import com.quanlydiemsinhvien.qldsv.pojo.Loaidiem;
 import com.quanlydiemsinhvien.qldsv.pojo.MonhocHocky;
 import com.quanlydiemsinhvien.qldsv.pojo.Monhocdangky;
@@ -72,19 +73,19 @@ public class DiemServiceImpl implements DiemService {
     @Autowired
     private MonHocDangKyConverter monHocDangKyConverter;
 
-
-
     @Override
     public List<Object> getDiemTrungBinhHaiHe(Map<String, String> params) {
         String sinhvienId = params.get("SinhVienId");
-        Sinhvien sinhvien = sinhVienRepository.findById(Integer.valueOf(sinhvienId)).orElseThrow(() -> new RuntimeException("Không tồn tại sinh viên này!"));
+        Sinhvien sinhvien = sinhVienRepository.findById(Integer.valueOf(sinhvienId))
+                .orElseThrow(() -> new RuntimeException("Không tồn tại sinh viên này!"));
         List<Monhocdangky> monhocdangkyList = monHocDangKyRepository.findByIdSinhVien(sinhvien);
         Set<Integer> idMonHocHocKy = new HashSet<>();
         for (Monhocdangky monhocdangky : monhocdangkyList) {
-                idMonHocHocKy.add(monhocdangky.getIdMonHoc().getIdMonHocHocKy());
+            idMonHocHocKy.add(monhocdangky.getIdMonHoc().getIdMonHocHocKy());
         }
         List<MonhocHocky> monhocHockyList = monHocHockyRepository.findByIdMonHocHocKyIn(new ArrayList<>(idMonHocHocKy));
-        Loaidiem loaidiem = loaidiemRepository.findByTenDiem("Điểm Trung Bình").orElseThrow(() -> new RuntimeException("Không tồn tại loại điểm này!"));
+        Loaidiem loaidiem = loaidiemRepository.findByTenDiem("Điểm Trung Bình")
+                .orElseThrow(() -> new RuntimeException("Không tồn tại loại điểm này!"));
         List<Diem> diemList = diemRepository.findByIdMonHocInAndTenDiem(monhocdangkyList, loaidiem);
         List<Object> result = getObjects(monhocHockyList, diemList);
 
@@ -94,17 +95,31 @@ public class DiemServiceImpl implements DiemService {
     @NotNull
     private static List<Object> getObjects(List<MonhocHocky> monhocHockyList, List<Diem> diemList) {
         List<Object> result = new ArrayList<>();
-        for(MonhocHocky monhocHocky : monhocHockyList) {
+        Set<Hocky> hockyList = new HashSet<>();
+        for (MonhocHocky monhocHocky : monhocHockyList) {
+            hockyList.add(monhocHocky.getIdHocky());
+        }
+        int mauSo = 0;
+        for (Hocky hocky : hockyList) {
             Double diemTrungBinh = 0.0;
             Double diemTrungBinhHe4 = 0.0;
-            for(Diem diem : diemList) {
-                if(monhocHocky.getIdMonHocHocKy().equals(diem.getIdMonHoc().getIdMonHoc().getIdMonHocHocKy())) {
-                    diemTrungBinh += diem.getSoDiem();
+            for (MonhocHocky monhocHocky : monhocHockyList) {
+
+                if (monhocHocky.getIdHocky().equals(hocky)) {
+
+                    for (Diem diem : diemList) {
+                        if (monhocHocky.getIdMonHocHocKy().equals(diem.getIdMonHoc().getIdMonHoc().getIdMonHocHocKy())) {
+                            diemTrungBinh += diem.getSoDiem();
+                            mauSo += 1;
+                        }
+                    }
                 }
+
             }
-            diemTrungBinh /= diemList.size();
-            diemTrungBinhHe4 = diemTrungBinh * 0.4;
-            Object[] row = new Object[]{monhocHocky.getIdHocky().getTenHocKy().getTenHocKy(), diemTrungBinh, diemTrungBinhHe4};
+            diemTrungBinh /= (mauSo == 0? 1 : mauSo);
+                    diemTrungBinhHe4 = diemTrungBinh * 0.4;
+                    mauSo = 0;
+            Object[] row = new Object[] { hocky.getTenHocKy().getTenHocKy(), diemTrungBinh, diemTrungBinhHe4 };
             result.add(row);
         }
         return result;
@@ -112,81 +127,88 @@ public class DiemServiceImpl implements DiemService {
 
     @Override
     public void editDiem(List<DiemMonHocDangKyRequest> request) {
-        Loaidiem kt1LoaiDiem = loaidiemRepository.findByTenDiem("Điểm KT1").orElseThrow(() -> new RuntimeException("Loại điểm không tồn tại!"));
-        Loaidiem kt2LoaiDiem = loaidiemRepository.findByTenDiem("Điểm KT2").orElseThrow(() -> new RuntimeException("Loại điểm không tồn tại!"));
-        Loaidiem kt3LoaiDiem = loaidiemRepository.findByTenDiem("Điểm KT3").orElseThrow(() -> new RuntimeException("Loại điểm không tồn tại!"));
-        Loaidiem gkLoaiDiem = loaidiemRepository.findByTenDiem("Điểm Giữa Kỳ").orElseThrow(() -> new RuntimeException("Loại điểm không tồn tại!"));
-        Loaidiem ckLoaiDiem = loaidiemRepository.findByTenDiem("Điểm Cuối Kỳ").orElseThrow(() -> new RuntimeException("Loại điểm không tồn tại!"));
-        Loaidiem tbLoaiDiem = loaidiemRepository.findByTenDiem("Điểm Trung Bình").orElseThrow(() -> new RuntimeException("Loại điểm không tồn tại!"));
+        Loaidiem kt1LoaiDiem = loaidiemRepository.findByTenDiem("Điểm KT1")
+                .orElseThrow(() -> new RuntimeException("Loại điểm không tồn tại!"));
+        Loaidiem kt2LoaiDiem = loaidiemRepository.findByTenDiem("Điểm KT2")
+                .orElseThrow(() -> new RuntimeException("Loại điểm không tồn tại!"));
+        Loaidiem kt3LoaiDiem = loaidiemRepository.findByTenDiem("Điểm KT3")
+                .orElseThrow(() -> new RuntimeException("Loại điểm không tồn tại!"));
+        Loaidiem gkLoaiDiem = loaidiemRepository.findByTenDiem("Điểm Giữa Kỳ")
+                .orElseThrow(() -> new RuntimeException("Loại điểm không tồn tại!"));
+        Loaidiem ckLoaiDiem = loaidiemRepository.findByTenDiem("Điểm Cuối Kỳ")
+                .orElseThrow(() -> new RuntimeException("Loại điểm không tồn tại!"));
+        Loaidiem tbLoaiDiem = loaidiemRepository.findByTenDiem("Điểm Trung Bình")
+                .orElseThrow(() -> new RuntimeException("Loại điểm không tồn tại!"));
         for (DiemMonHocDangKyRequest req : request) {
-            Monhocdangky monhocdangky = monHocDangKyRepository.findById(req.getIdMonHocDangKy()).orElseThrow(() -> new RuntimeException("Môn học đăng ký không tồn tại!"));
-            if(req.getDiemKT1() != null){
+            Monhocdangky monhocdangky = monHocDangKyRepository.findById(req.getIdMonHocDangKy())
+                    .orElseThrow(() -> new RuntimeException("Môn học đăng ký không tồn tại!"));
+            if (req.getDiemKT1() != null) {
                 Diem diem = diemRepository.findByIdMonHocAndTenDiem(
                         monhocdangky,
-                        kt1LoaiDiem
-                ).orElse(null);
-                if(diem == null) {
-                    diemRepository.save(Diem.builder().tenDiem(kt1LoaiDiem).khoaDiem((short)0).idMonHoc(monhocdangky).soDiem(req.getDiemKT1()).build());
+                        kt1LoaiDiem).orElse(null);
+                if (diem == null) {
+                    diemRepository.save(Diem.builder().tenDiem(kt1LoaiDiem).khoaDiem((short) 0).idMonHoc(monhocdangky)
+                            .soDiem(req.getDiemKT1()).build());
                 } else {
                     diem.setSoDiem(req.getDiemKT1());
                     diemRepository.save(diem);
                 }
             }
-            if(req.getDiemKT2() != null){
+            if (req.getDiemKT2() != null) {
                 Diem diem = diemRepository.findByIdMonHocAndTenDiem(
                         monhocdangky,
-                        kt2LoaiDiem
-                ).orElse(null);
-                if(diem == null) {
-                    diemRepository.save(Diem.builder().tenDiem(kt2LoaiDiem).khoaDiem((short)0).idMonHoc(monhocdangky).soDiem(req.getDiemKT2()).build());
+                        kt2LoaiDiem).orElse(null);
+                if (diem == null) {
+                    diemRepository.save(Diem.builder().tenDiem(kt2LoaiDiem).khoaDiem((short) 0).idMonHoc(monhocdangky)
+                            .soDiem(req.getDiemKT2()).build());
                 } else {
                     diem.setSoDiem(req.getDiemKT2());
                     diemRepository.save(diem);
                 }
             }
-            if(req.getDiemKT3() != null){
+            if (req.getDiemKT3() != null) {
                 Diem diem = diemRepository.findByIdMonHocAndTenDiem(
                         monhocdangky,
-                        kt3LoaiDiem
-                ).orElse(null);
-                if(diem == null) {
-                    diemRepository.save(Diem.builder().tenDiem(kt3LoaiDiem).khoaDiem((short)0).idMonHoc(monhocdangky).soDiem(req.getDiemKT3()).build());
+                        kt3LoaiDiem).orElse(null);
+                if (diem == null) {
+                    diemRepository.save(Diem.builder().tenDiem(kt3LoaiDiem).khoaDiem((short) 0).idMonHoc(monhocdangky)
+                            .soDiem(req.getDiemKT3()).build());
                 } else {
                     diem.setSoDiem(req.getDiemKT3());
                     diemRepository.save(diem);
                 }
             }
-            if(req.getDiemGK() != null){
+            if (req.getDiemGK() != null) {
                 Diem diem = diemRepository.findByIdMonHocAndTenDiem(
                         monhocdangky,
-                        gkLoaiDiem
-                ).orElse(null);
-                if(diem == null) {
-                    diemRepository.save(Diem.builder().tenDiem(gkLoaiDiem).khoaDiem((short)0).idMonHoc(monhocdangky).soDiem(req.getDiemGK()).build());
+                        gkLoaiDiem).orElse(null);
+                if (diem == null) {
+                    diemRepository.save(Diem.builder().tenDiem(gkLoaiDiem).khoaDiem((short) 0).idMonHoc(monhocdangky)
+                            .soDiem(req.getDiemGK()).build());
                 } else {
                     diem.setSoDiem(req.getDiemGK());
                     diemRepository.save(diem);
                 }
             }
-            if(req.getDiemCK() != null){
+            if (req.getDiemCK() != null) {
                 Diem diem = diemRepository.findByIdMonHocAndTenDiem(
                         monhocdangky,
-                        ckLoaiDiem
-                ).orElse(null);
-                if(diem == null) {
-                    diemRepository.save(Diem.builder().tenDiem(ckLoaiDiem).khoaDiem((short)0).idMonHoc(monhocdangky).soDiem(req.getDiemCK()).build());
+                        ckLoaiDiem).orElse(null);
+                if (diem == null) {
+                    diemRepository.save(Diem.builder().tenDiem(ckLoaiDiem).khoaDiem((short) 0).idMonHoc(monhocdangky)
+                            .soDiem(req.getDiemCK()).build());
                 } else {
                     diem.setSoDiem(req.getDiemCK());
                     diemRepository.save(diem);
                 }
             }
-            if(req.getDiemTB() != null){
+            if (req.getDiemTB() != null) {
                 Diem diem = diemRepository.findByIdMonHocAndTenDiem(
                         monhocdangky,
-                        tbLoaiDiem
-                ).orElse(null);
-                if(diem == null) {
-                    diemRepository.save(Diem.builder().tenDiem(tbLoaiDiem).khoaDiem((short)0).idMonHoc(monhocdangky).soDiem(req.getDiemTB()).build());
+                        tbLoaiDiem).orElse(null);
+                if (diem == null) {
+                    diemRepository.save(Diem.builder().tenDiem(tbLoaiDiem).khoaDiem((short) 0).idMonHoc(monhocdangky)
+                            .soDiem(req.getDiemTB()).build());
                 } else {
                     diem.setSoDiem(req.getDiemTB());
                     diemRepository.save(diem);
@@ -194,35 +216,39 @@ public class DiemServiceImpl implements DiemService {
             }
         }
     }
-//
+    //
 
     @Override
     public double getDiemTrungBinh(Map<String, String> params) {
         String sinhvienId = params.get("SinhVienId");
-        Sinhvien sinhvien = sinhVienRepository.findById(Integer.valueOf(sinhvienId)).orElseThrow(() -> new RuntimeException("Không tồn tại sinh viên này!"));
+        Sinhvien sinhvien = sinhVienRepository.findById(Integer.valueOf(sinhvienId))
+                .orElseThrow(() -> new RuntimeException("Không tồn tại sinh viên này!"));
         List<Monhocdangky> monhocdangkyList = monHocDangKyRepository.findByIdSinhVien(sinhvien);
-        Loaidiem loaidiem = loaidiemRepository.findByTenDiem("Điểm Trung Bình").orElseThrow(() -> new RuntimeException("Không tồn tại loại điểm này!"));
+        Loaidiem loaidiem = loaidiemRepository.findByTenDiem("Điểm Trung Bình")
+                .orElseThrow(() -> new RuntimeException("Không tồn tại loại điểm này!"));
         List<Diem> diemList = diemRepository.findByIdMonHocInAndTenDiem(monhocdangkyList, loaidiem);
         Double diemTrungBinh = 0.0;
-        for(Diem diem : diemList) {
+        for (Diem diem : diemList) {
             diemTrungBinh += diem.getSoDiem();
         }
         diemTrungBinh /= diemList.size();
         return diemTrungBinh;
     }
 
-//
+    //
 
     @Override
     public List<DiemMonHoc> getListDiemDangHoc(Map<String, String> params) {
         String sinhVienId = params.get("SinhVienId");
-        Sinhvien sinhvien = sinhVienRepository.findById(Integer.valueOf(sinhVienId)).orElseThrow(() -> new RuntimeException("Không tồn tại sinh viên này"));
+        Sinhvien sinhvien = sinhVienRepository.findById(Integer.valueOf(sinhVienId))
+                .orElseThrow(() -> new RuntimeException("Không tồn tại sinh viên này"));
         List<Monhocdangky> monHocList = monHocDangKyRepository.findByIdSinhVien(sinhvien);
         List<DiemMonHoc> monHocDiemList = new ArrayList<>();
 
         for (Monhocdangky monHoc : monHocList) {
             if (monHoc.getKhoaMon() == 0) {
-                DiemMonHoc monHocDiem = DiemMonHoc.fromMonHocDangKy(monHocDangKyConverter.monhocdangkyToMonhocdangkyDTO(monHoc));
+                DiemMonHoc monHocDiem = DiemMonHoc
+                        .fromMonHocDangKy(monHocDangKyConverter.monhocdangkyToMonhocdangkyDTO(monHoc));
                 List<Diem> diemList = diemRepository.findByIdMonHoc(monHoc);
                 for (Diem diem : diemList) {
                     monHocDiem.addDiem(diem);
@@ -242,13 +268,15 @@ public class DiemServiceImpl implements DiemService {
     @Override
     public List<DiemMonHoc> getListDiemDaHoc(Map<String, String> params) {
         String sinhVienId = params.get("SinhVienId");
-        Sinhvien sinhvien = sinhVienRepository.findById(Integer.valueOf(sinhVienId)).orElseThrow(() -> new RuntimeException("Không tồn tại sinh viên này"));
+        Sinhvien sinhvien = sinhVienRepository.findById(Integer.valueOf(sinhVienId))
+                .orElseThrow(() -> new RuntimeException("Không tồn tại sinh viên này"));
         List<Monhocdangky> monHocList = monHocDangKyRepository.findByIdSinhVien(sinhvien);
         List<DiemMonHoc> monHocDiemList = new ArrayList<>();
 
         for (Monhocdangky monHoc : monHocList) {
             if (monHoc.getKhoaMon() == 1) {
-                DiemMonHoc monHocDiem = DiemMonHoc.fromMonHocDangKy(monHocDangKyConverter.monhocdangkyToMonhocdangkyDTO(monHoc));
+                DiemMonHoc monHocDiem = DiemMonHoc
+                        .fromMonHocDangKy(monHocDangKyConverter.monhocdangkyToMonhocdangkyDTO(monHoc));
 
                 // Lấy danh sách điểm của môn học
                 List<Diem> diemList = diemRepository.findByIdMonHoc(monHoc);
@@ -271,22 +299,23 @@ public class DiemServiceImpl implements DiemService {
     public DiemMonHoc addDiem(Map<String, String> params) {
         int idMonHocDangKy = Integer.parseInt(params.get("idMonHocDangKy"));
         Double DiemGK = Double.parseDouble(params.get("DiemGK"));
-        Double DiemCK =  Double.parseDouble(params.get("DiemCK"));
+        Double DiemCK = Double.parseDouble(params.get("DiemCK"));
         String KT1 = params.get("DiemKT1");
         String KT2 = params.get("DiemKT2");
         String KT3 = params.get("DiemKT3");
         Double DiemKT1 = -1.0, DiemKT2 = -1.0, DiemKT3 = -1.0;
         if (!KT1.isEmpty()) {
-            DiemKT1 =  Double.parseDouble(KT1);
+            DiemKT1 = Double.parseDouble(KT1);
         }
         if (!KT2.isEmpty()) {
-            DiemKT2 =  Double.parseDouble(KT2);
+            DiemKT2 = Double.parseDouble(KT2);
         }
         if (!KT3.isEmpty()) {
-            DiemKT3 =  Double.parseDouble(KT3);
+            DiemKT3 = Double.parseDouble(KT3);
         }
         DiemMonHoc diem1 = new DiemMonHoc(idMonHocDangKy, DiemGK, DiemCK, DiemKT1, DiemKT2, DiemKT3);
-        Monhocdangky monhoc = monHocDangKyRepository.findById(idMonHocDangKy).orElseThrow(() -> new RuntimeException("Môn học đăng kí không tồn tại!"));
+        Monhocdangky monhoc = monHocDangKyRepository.findById(idMonHocDangKy)
+                .orElseThrow(() -> new RuntimeException("Môn học đăng kí không tồn tại!"));
         List<Diem> diem = this.diemRepository.findByIdMonHoc(monhoc);
         if (monhoc.getKhoaMon() == 0) {
             Double diemTB = 0.0;
@@ -347,7 +376,8 @@ public class DiemServiceImpl implements DiemService {
 
         if (!file.isEmpty()) {
             String idMonHoc = params.get("idMonHoc");
-            try (CSVParser parser = CSVParser.parse(file.getInputStream(), StandardCharsets.UTF_8, CSVFormat.DEFAULT.withFirstRecordAsHeader())) {
+            try (CSVParser parser = CSVParser.parse(file.getInputStream(), StandardCharsets.UTF_8,
+                    CSVFormat.DEFAULT.withFirstRecordAsHeader())) {
                 for (CSVRecord record : parser) {
                     String idSinhVien = record.get("idSinhVien");
                     String diemGiuaKy = record.get("diemGiuaKy");
@@ -368,11 +398,15 @@ public class DiemServiceImpl implements DiemService {
                         DiemTK3 = -1.0;
                     }
 
-                    MonhocHocky monhocHocky = monHocHockyRepository.findById(Integer.parseInt(idMonHoc)).orElseThrow(() -> new RuntimeException("Môn học học kỳ không tồn tại!"));
-                    Sinhvien sinhvien = sinhVienRepository.findById(Integer.valueOf(idSinhVien)).orElseThrow(() -> new RuntimeException("Sinh viên không tồn tại!"));
-                    Monhocdangky monHoc = monHocDangKyRepository.findByIdSinhVienAndIdMonHoc(sinhvien, monhocHocky).orElseThrow(() -> new RuntimeException("Môn học đăng kí không tồn tại!"));
+                    MonhocHocky monhocHocky = monHocHockyRepository.findById(Integer.parseInt(idMonHoc))
+                            .orElseThrow(() -> new RuntimeException("Môn học học kỳ không tồn tại!"));
+                    Sinhvien sinhvien = sinhVienRepository.findById(Integer.valueOf(idSinhVien))
+                            .orElseThrow(() -> new RuntimeException("Sinh viên không tồn tại!"));
+                    Monhocdangky monHoc = monHocDangKyRepository.findByIdSinhVienAndIdMonHoc(sinhvien, monhocHocky)
+                            .orElseThrow(() -> new RuntimeException("Môn học đăng kí không tồn tại!"));
                     if (monHoc != null && monHoc.getKhoaMon() == 0) {
-                        DiemMonHoc diem1 = new DiemMonHoc(monHoc.getIdMonHocDangKy(), Double.parseDouble(diemGiuaKy), Double.parseDouble(diemCuoiKy), DiemTK1, DiemTK2, DiemTK3);
+                        DiemMonHoc diem1 = new DiemMonHoc(monHoc.getIdMonHocDangKy(), Double.parseDouble(diemGiuaKy),
+                                Double.parseDouble(diemCuoiKy), DiemTK1, DiemTK2, DiemTK3);
                         List<Diem> diem = this.diemRepository.findByIdMonHoc(monHoc);
                         Double diemTB = 0.0;
                         String xepLoai;
@@ -382,9 +416,12 @@ public class DiemServiceImpl implements DiemService {
                         } else if (diem1.getDiemKT2() == -1) {
                             diemTB = (diem1.getDiemGK() * 0.4 + diem1.getDiemKT1() * 0.1 + diem1.getDiemCK() * 0.5);
                         } else if (diem1.getDiemKT3() == -1) {
-                            diemTB = (diem1.getDiemGK() * 0.3 + diem1.getDiemKT1() * 0.1 + diem1.getDiemKT2() * 0.1 + diem1.getDiemCK() * 0.5);
+                            diemTB = (diem1.getDiemGK() * 0.3 + diem1.getDiemKT1() * 0.1 + diem1.getDiemKT2() * 0.1
+                                    + diem1.getDiemCK() * 0.5);
                         } else {
-                            diemTB = (diem1.getDiemGK() * 0.2 + (diem1.getDiemKT1() + diem1.getDiemKT2() + diem1.getDiemKT3()) * 0.1 + diem1.getDiemCK() * 0.5);
+                            diemTB = (diem1.getDiemGK() * 0.2
+                                    + (diem1.getDiemKT1() + diem1.getDiemKT2() + diem1.getDiemKT3()) * 0.1
+                                    + diem1.getDiemCK() * 0.5);
                         }
                         // Tính trạng thái dựa trên điểm trung bình
                         DecimalFormat decimalFormat = new DecimalFormat("#.#", new DecimalFormatSymbols(Locale.US));
@@ -430,11 +467,14 @@ public class DiemServiceImpl implements DiemService {
         return "oke";
     }
 
-    private void addDiem( Monhocdangky monHoc, DiemMonHoc diem1, List<Diem> diem){
+    private void addDiem(Monhocdangky monHoc, DiemMonHoc diem1, List<Diem> diem) {
 
-        Loaidiem loaiDiemKt1 = loaidiemRepository.findByTenDiem("Điểm KT1").orElseThrow(() -> new RuntimeException("Không tồn tại loại điểm này"));
-        Loaidiem loaiDiemKt2 = loaidiemRepository.findByTenDiem("Điểm KT2").orElseThrow(() -> new RuntimeException("Không tồn tại loại điểm này"));
-        Loaidiem loaiDiemKt3 = loaidiemRepository.findByTenDiem("Điểm KT3").orElseThrow(() -> new RuntimeException("Không tồn tại loại điểm này"));
+        Loaidiem loaiDiemKt1 = loaidiemRepository.findByTenDiem("Điểm KT1")
+                .orElseThrow(() -> new RuntimeException("Không tồn tại loại điểm này"));
+        Loaidiem loaiDiemKt2 = loaidiemRepository.findByTenDiem("Điểm KT2")
+                .orElseThrow(() -> new RuntimeException("Không tồn tại loại điểm này"));
+        Loaidiem loaiDiemKt3 = loaidiemRepository.findByTenDiem("Điểm KT3")
+                .orElseThrow(() -> new RuntimeException("Không tồn tại loại điểm này"));
         short khoaDiem = 0;
         diemRepository.deleteByTenDiemIn(Arrays.asList(loaiDiemKt1, loaiDiemKt3, loaiDiemKt2));
         diem.removeIf(diemm -> diemm.getTenDiem().getTenDiem().equals("Điểm KT1")
@@ -443,13 +483,16 @@ public class DiemServiceImpl implements DiemService {
 
         List<Diem> diemList = new ArrayList<>();
         if (diem1.getDiemKT1() != -1) {
-            diemList.add(Diem.builder().tenDiem(loaiDiemKt1).soDiem(diem1.getDiemKT1()).idMonHoc(monHoc).khoaDiem(khoaDiem).build());
+            diemList.add(Diem.builder().tenDiem(loaiDiemKt1).soDiem(diem1.getDiemKT1()).idMonHoc(monHoc)
+                    .khoaDiem(khoaDiem).build());
         }
         if (diem1.getDiemKT2() != -1) {
-            diemList.add(Diem.builder().tenDiem(loaiDiemKt2).soDiem(diem1.getDiemKT2()).idMonHoc(monHoc).khoaDiem(khoaDiem).build());
+            diemList.add(Diem.builder().tenDiem(loaiDiemKt2).soDiem(diem1.getDiemKT2()).idMonHoc(monHoc)
+                    .khoaDiem(khoaDiem).build());
         }
         if (diem1.getDiemKT3() != -1) {
-            diemList.add(Diem.builder().tenDiem(loaiDiemKt3).soDiem(diem1.getDiemKT3()).idMonHoc(monHoc).khoaDiem(khoaDiem).build());
+            diemList.add(Diem.builder().tenDiem(loaiDiemKt3).soDiem(diem1.getDiemKT3()).idMonHoc(monHoc)
+                    .khoaDiem(khoaDiem).build());
         }
         monHocDangKyRepository.save(monHoc);
         diemRepository.saveAll(diemList);
@@ -458,28 +501,35 @@ public class DiemServiceImpl implements DiemService {
     @Override
     public DiemMonHoc getDiemByIdDiem(Map<String, String> params) {
         String idMonHocDangKy = params.get("idMonHocDangKy");
-        Monhocdangky monhocdangky = monHocDangKyRepository.findById(Integer.parseInt(idMonHocDangKy)).orElseThrow(() -> new RuntimeException("Môn học đăng ký không tồn tại!"));
-        DiemMonHoc monHocDiem = DiemMonHoc.fromMonHocDangKy(monHocDangKyConverter.monhocdangkyToMonhocdangkyDTO(monhocdangky));
+        Monhocdangky monhocdangky = monHocDangKyRepository.findById(Integer.parseInt(idMonHocDangKy))
+                .orElseThrow(() -> new RuntimeException("Môn học đăng ký không tồn tại!"));
+        DiemMonHoc monHocDiem = DiemMonHoc
+                .fromMonHocDangKy(monHocDangKyConverter.monhocdangkyToMonhocdangkyDTO(monhocdangky));
         return monHocDiem;
     }
 
     @Override
     public List<MonhocdangkyDTO> getDiemByidGiangVien(Map<String, String> params) {
         String giangVienId = params.get("idGiangVien");
-        Giangvien giangvien = giangvienRepository.findById(Integer.valueOf(giangVienId)).orElseThrow(() -> new RuntimeException("Giảng viên không tồn tại!"));
+        Giangvien giangvien = giangvienRepository.findById(Integer.valueOf(giangVienId))
+                .orElseThrow(() -> new RuntimeException("Giảng viên không tồn tại!"));
         String tenSinhVien = params.get("tenSinhVien");
-        Sinhvien sinhvien = sinhVienRepository.findById(Integer.valueOf(tenSinhVien)).orElse(sinhVienRepository.findByHoTen(tenSinhVien).orElseThrow(() -> new RuntimeException("Sinh viên không tồn tại")));
+        Sinhvien sinhvien = sinhVienRepository.findById(Integer.valueOf(tenSinhVien)).orElse(sinhVienRepository
+                .findByHoTen(tenSinhVien).orElseThrow(() -> new RuntimeException("Sinh viên không tồn tại")));
         List<MonhocHocky> monhocHockyList = monHocHockyRepository.findByIdGiangVien(giangvien);
-        List<Monhocdangky> monhocdangkyList = monHocDangKyRepository.findByIdMonHocInAndIdSinhVien(monhocHockyList, sinhvien);
-       return monhocdangkyList.stream().map(it -> monHocDangKyConverter.monhocdangkyToMonhocdangkyDTO(it)).collect(Collectors.toList());
+        List<Monhocdangky> monhocdangkyList = monHocDangKyRepository.findByIdMonHocInAndIdSinhVien(monhocHockyList,
+                sinhvien);
+        return monhocdangkyList.stream().map(it -> monHocDangKyConverter.monhocdangkyToMonhocdangkyDTO(it))
+                .collect(Collectors.toList());
     }
-//
+    //
 
     @Override
     public boolean khoaDiem(Map<String, String> params) {
         try {
             String idMonHoc = params.get("idMonHoc");
-            MonhocHocky monhocHocky = monHocHockyRepository.findById(Integer.parseInt((idMonHoc))).orElseThrow(() -> new RuntimeException("Môn học học kỳ không tồn tại!"));
+            MonhocHocky monhocHocky = monHocHockyRepository.findById(Integer.parseInt((idMonHoc)))
+                    .orElseThrow(() -> new RuntimeException("Môn học học kỳ không tồn tại!"));
             List<Monhocdangky> monhocdangky = monHocDangKyRepository.findByIdMonHoc(monhocHocky);
             SimpleMailMessage message = new SimpleMailMessage();
             short khoaDiem = 1;
@@ -495,7 +545,7 @@ public class DiemServiceImpl implements DiemService {
                 monHocDangKyRepository.save(monhoc);
             }
             return true;
-        }catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             return false;
         }
@@ -505,7 +555,8 @@ public class DiemServiceImpl implements DiemService {
     public Boolean dangKyMonHoc(Map<String, String> params) {
         int IdMonHoc = Integer.parseInt(params.get("IdMonHoc"));
         String IdSinhVien = params.get("IdSinhVien");
-        Sinhvien sinhvien = sinhVienRepository.findById(Integer.valueOf(IdSinhVien)).orElseThrow(() -> new RuntimeException("Sinh viên không tồn tại!"));
+        Sinhvien sinhvien = sinhVienRepository.findById(Integer.valueOf(IdSinhVien))
+                .orElseThrow(() -> new RuntimeException("Sinh viên không tồn tại!"));
         MonhocHocky monHocHocKy = monHocHockyRepository.findById(IdMonHoc).orElse(null);
         Monhocdangky monHocDK = monHocDangKyRepository.findByIdSinhVienAndIdMonHoc(sinhvien, monHocHocKy).orElse(null);
         if (monHocHocKy == null || monHocHocKy.getSoLuongConLai() <= 0) {
@@ -533,7 +584,8 @@ public class DiemServiceImpl implements DiemService {
     public Boolean huyDangKy(Map<String, String> params) {
         int IdMonHoc = Integer.parseInt(params.get("IdMonHoc"));
         String IdSinhVien = params.get("IdSinhVien");
-        Sinhvien sinhvien = sinhVienRepository.findById(Integer.valueOf(IdSinhVien)).orElseThrow(() -> new RuntimeException("Sinh viên không tồn tại!"));
+        Sinhvien sinhvien = sinhVienRepository.findById(Integer.valueOf(IdSinhVien))
+                .orElseThrow(() -> new RuntimeException("Sinh viên không tồn tại!"));
         MonhocHocky monhocHocky = monHocHockyRepository.findById(IdMonHoc).orElse(null);
         Monhocdangky monHocDK = monHocDangKyRepository.findByIdSinhVienAndIdMonHoc(sinhvien, monhocHocky).orElse(null);
         if (monhocHocky == null) {
@@ -547,15 +599,20 @@ public class DiemServiceImpl implements DiemService {
         }
         return false;
     }
+
     @Override
     public boolean addCotDiem(Map<String, String> params) {
         try {
             String idMonHoc = params.get("idMonHoc");
-            MonhocHocky monhocHocky = monHocHockyRepository.findById(Integer.parseInt(idMonHoc)).orElseThrow(() -> new RuntimeException("Môn học học kỳ không tồn tại!"));
+            MonhocHocky monhocHocky = monHocHockyRepository.findById(Integer.parseInt(idMonHoc))
+                    .orElseThrow(() -> new RuntimeException("Môn học học kỳ không tồn tại!"));
             List<Monhocdangky> monhocdangkyList = monHocDangKyRepository.findByIdMonHoc(monhocHocky);
-            Loaidiem LoaiKT1 = loaidiemRepository.findByTenDiem("Điểm KT1").orElseThrow(() -> new RuntimeException("Loại điểm không tồn tại!"));
-            Loaidiem LoaiKT2 = loaidiemRepository.findByTenDiem("Điểm KT2").orElseThrow(() -> new RuntimeException("Loại điểm không tồn tại!"));
-            Loaidiem LoaiKT3 = loaidiemRepository.findByTenDiem("Điểm KT3").orElseThrow(() -> new RuntimeException("Loại điểm không tồn tại!"));
+            Loaidiem LoaiKT1 = loaidiemRepository.findByTenDiem("Điểm KT1")
+                    .orElseThrow(() -> new RuntimeException("Loại điểm không tồn tại!"));
+            Loaidiem LoaiKT2 = loaidiemRepository.findByTenDiem("Điểm KT2")
+                    .orElseThrow(() -> new RuntimeException("Loại điểm không tồn tại!"));
+            Loaidiem LoaiKT3 = loaidiemRepository.findByTenDiem("Điểm KT3")
+                    .orElseThrow(() -> new RuntimeException("Loại điểm không tồn tại!"));
             for (Monhocdangky monHoc : monhocdangkyList) {
                 boolean KT1 = true;
                 boolean KT2 = true;
@@ -584,7 +641,7 @@ public class DiemServiceImpl implements DiemService {
                 }
             }
             return true;
-        }catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             return false;
         }
@@ -593,11 +650,15 @@ public class DiemServiceImpl implements DiemService {
     @Override
     public boolean deleteCotDiem(Map<String, String> params) {
         String idMonHoc = params.get("idMonHoc");
-        MonhocHocky monhocHocky = monHocHockyRepository.findById(Integer.parseInt(idMonHoc)).orElseThrow(() -> new RuntimeException("Môn học học kỳ không tồn tại!"));
+        MonhocHocky monhocHocky = monHocHockyRepository.findById(Integer.parseInt(idMonHoc))
+                .orElseThrow(() -> new RuntimeException("Môn học học kỳ không tồn tại!"));
         List<Monhocdangky> monhocdangkyList = monHocDangKyRepository.findByIdMonHoc(monhocHocky);
-        Loaidiem LoaiKT1 = loaidiemRepository.findByTenDiem("Điểm KT1").orElseThrow(() -> new RuntimeException("Loại điểm không tồn tại!"));
-        Loaidiem LoaiKT2 = loaidiemRepository.findByTenDiem("Điểm KT2").orElseThrow(() -> new RuntimeException("Loại điểm không tồn tại!"));
-        Loaidiem LoaiKT3 = loaidiemRepository.findByTenDiem("Điểm KT3").orElseThrow(() -> new RuntimeException("Loại điểm không tồn tại!"));
+        Loaidiem LoaiKT1 = loaidiemRepository.findByTenDiem("Điểm KT1")
+                .orElseThrow(() -> new RuntimeException("Loại điểm không tồn tại!"));
+        Loaidiem LoaiKT2 = loaidiemRepository.findByTenDiem("Điểm KT2")
+                .orElseThrow(() -> new RuntimeException("Loại điểm không tồn tại!"));
+        Loaidiem LoaiKT3 = loaidiemRepository.findByTenDiem("Điểm KT3")
+                .orElseThrow(() -> new RuntimeException("Loại điểm không tồn tại!"));
         for (Monhocdangky monHoc : monhocdangkyList) {
             boolean KT1 = false;
             boolean KT2 = false;
@@ -634,14 +695,21 @@ public class DiemServiceImpl implements DiemService {
     public boolean setDiemTB(Map<String, String> params) {
         try {
             String idMonHoc = params.get("idMonHoc");
-            MonhocHocky monhocHocky = monHocHockyRepository.findById(Integer.parseInt(idMonHoc)).orElseThrow(() -> new RuntimeException("Môn học học kỳ không tồn tại!"));
+            MonhocHocky monhocHocky = monHocHockyRepository.findById(Integer.parseInt(idMonHoc))
+                    .orElseThrow(() -> new RuntimeException("Môn học học kỳ không tồn tại!"));
             List<Monhocdangky> monhocdangkyList = monHocDangKyRepository.findByIdMonHoc(monhocHocky);
-            Loaidiem LoaiKT1 = loaidiemRepository.findByTenDiem("Điểm KT1").orElseThrow(() -> new RuntimeException("Loại điểm không tồn tại!"));
-            Loaidiem LoaiKT2 = loaidiemRepository.findByTenDiem("Điểm KT2").orElseThrow(() -> new RuntimeException("Loại điểm không tồn tại!"));
-            Loaidiem LoaiKT3 = loaidiemRepository.findByTenDiem("Điểm KT3").orElseThrow(() -> new RuntimeException("Loại điểm không tồn tại!"));
-            Loaidiem LoaiCK = loaidiemRepository.findByTenDiem("Điểm Cuối Kỳ").orElseThrow(() -> new RuntimeException("Loại điểm không tồn tại!"));
-            Loaidiem LoaiGK = loaidiemRepository.findByTenDiem("Điểm Giữa Kỳ").orElseThrow(() -> new RuntimeException("Loại điểm không tồn tại!"));
-            Loaidiem LoaiTB = loaidiemRepository.findByTenDiem("Điểm Trung Bình").orElseThrow(() -> new RuntimeException("Loại điểm không tồn tại!"));
+            Loaidiem LoaiKT1 = loaidiemRepository.findByTenDiem("Điểm KT1")
+                    .orElseThrow(() -> new RuntimeException("Loại điểm không tồn tại!"));
+            Loaidiem LoaiKT2 = loaidiemRepository.findByTenDiem("Điểm KT2")
+                    .orElseThrow(() -> new RuntimeException("Loại điểm không tồn tại!"));
+            Loaidiem LoaiKT3 = loaidiemRepository.findByTenDiem("Điểm KT3")
+                    .orElseThrow(() -> new RuntimeException("Loại điểm không tồn tại!"));
+            Loaidiem LoaiCK = loaidiemRepository.findByTenDiem("Điểm Cuối Kỳ")
+                    .orElseThrow(() -> new RuntimeException("Loại điểm không tồn tại!"));
+            Loaidiem LoaiGK = loaidiemRepository.findByTenDiem("Điểm Giữa Kỳ")
+                    .orElseThrow(() -> new RuntimeException("Loại điểm không tồn tại!"));
+            Loaidiem LoaiTB = loaidiemRepository.findByTenDiem("Điểm Trung Bình")
+                    .orElseThrow(() -> new RuntimeException("Loại điểm không tồn tại!"));
             for (Monhocdangky monHoc : monhocdangkyList) {
                 boolean KT1 = false;
                 boolean KT2 = false;
@@ -669,7 +737,8 @@ public class DiemServiceImpl implements DiemService {
                 }
 
                 if (KT3) {
-                    DiemTB = GK.getSoDiem() * 0.2 + (Kt1.getSoDiem() + Kt2.getSoDiem() + Kt3.getSoDiem()) * 0.1 + CK.getSoDiem() * 0.5;
+                    DiemTB = GK.getSoDiem() * 0.2 + (Kt1.getSoDiem() + Kt2.getSoDiem() + Kt3.getSoDiem()) * 0.1
+                            + CK.getSoDiem() * 0.5;
                 } else if (KT2) {
                     DiemTB = GK.getSoDiem() * 0.3 + (Kt1.getSoDiem() + Kt2.getSoDiem()) * 0.1 + CK.getSoDiem() * 0.5;
                 } else if (KT1) {

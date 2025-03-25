@@ -28,7 +28,7 @@ const LoginAdmin = () => {
         cookie.save("refresh_token", res.data.refresh_token);
         let { data } = await api().get(endpoints["current-user"]);
         cookie.save("user", data);
-        if (data.chucVu.tenloaitaikhoan === "ROLE_GVU") {
+        if (Array.from(data.chucVu).includes("GVU")) {
           let sinhvien = await api().get("/giaovu/current-giaovu");
           cookie.save("giaovu", sinhvien.data);
           dispatch({

@@ -25,6 +25,7 @@ import com.quanlydiemsinhvien.qldsv.repository.TraloidiendanRepository;
 import com.quanlydiemsinhvien.qldsv.request.CauhoidiendangRequest;
 import com.quanlydiemsinhvien.qldsv.request.TraloidiendanRequest;
 import com.quanlydiemsinhvien.qldsv.service.DienDanService;
+import com.quanlydiemsinhvien.qldsv.service.KeycloakUserService;
 
 @Service
 @Transactional
@@ -45,13 +46,16 @@ public class DienDanServiceImpl implements DienDanService {
     @Autowired
     private TaiKhoanRepository taiKhoanRepository;
 
+    @Autowired
+    private KeycloakUserService keycloakUserService;
+
     @Override
     public Object getCauHoi(Map<String, String> params) {
         String cateId = params.get("cauhoiId");
             Cauhoidiendang cauhoidiendang = cauhoidiendangRepository.findById(Integer.parseInt(cateId))
             .orElseThrow(() -> new RuntimeException("Câu hỏi diễn đàng không tồn tại!"));
         Taikhoan taikhoan = cauhoidiendang.getIdTaiKhoan();
-        return new Object[] { cauhoidiendang.getNoiDungCauHoi(), cauhoidiendang.getNgayTao(), taikhoan.getTenTaiKhoan(),
+        return new Object[] { cauhoidiendang.getNoiDungCauHoi(), cauhoidiendang.getNgayTao(), keycloakUserService.getUsernameByUserId(taikhoan.getIdTaiKhoan()),
                 taikhoan.getImage() };
     }
 

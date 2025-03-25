@@ -21,8 +21,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.quanlydiemsinhvien.qldsv.dto.CauhoidiendangDTO;
 import com.quanlydiemsinhvien.qldsv.dto.TraloidiendanDTO;
-import com.quanlydiemsinhvien.qldsv.pojo.Cauhoidiendang;
-import com.quanlydiemsinhvien.qldsv.pojo.Traloidiendan;
 import com.quanlydiemsinhvien.qldsv.request.CauhoidiendangRequest;
 import com.quanlydiemsinhvien.qldsv.request.TraloidiendanRequest;
 import com.quanlydiemsinhvien.qldsv.service.DienDanService;

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { api } from "../../api";
 import { useNavigate, useParams } from "react-router-dom";
+import dayjs from 'dayjs';
 
 const ThemSuaGiangVien = () => {
 
@@ -11,12 +12,7 @@ const ThemSuaGiangVien = () => {
     async function getSinhVien(){
         try{
             const response = await api().get(`/giaovu/giangvien/${id}`);
-            console.log(response.data);
             setStudent(response.data);
-            setFormData(prev => ({
-                ...prev,
-                ...response.data
-            }))
         }catch(e){
             console.error(e);
         }
@@ -36,7 +32,18 @@ const ThemSuaGiangVien = () => {
         email: student?.email || ""
     });
 
-    console.log(formData);
+    useEffect(() => {
+        setFormData(prev => ({
+            ...prev,
+            idGiangVien: student?.idGiangVien || "",
+            hoTen: student?.hoTen || "",
+            ngaySinh: dayjs(student?.ngaySinh).format("YYYY-MM-DD") || "",
+            diaChi: student?.diaChi || "",
+            gioiTinh: student?.gioiTinh ?? "-1",
+            soDienThoai: student?.soDienThoai || "",
+            email: student?.email || ""
+        }))
+    }, [student])
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });

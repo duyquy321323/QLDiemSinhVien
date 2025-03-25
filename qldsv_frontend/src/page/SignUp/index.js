@@ -2,9 +2,9 @@ import { useState } from "react";
 import { Alert, Button, Form } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
 import Apis, { endpoints } from "../../api";
-import MySpinner from "../../component/MySpinner";
 import Footer from "../../component/Footer";
 import Header from "../../component/Header";
+import MySpinner from "../../component/MySpinner";
 const SignUp = () => {
 
     let nav = useNavigate();
@@ -63,6 +63,7 @@ const SignUp = () => {
             setLoading(true)
             let res = await Apis.post(endpoints['signup'], formData);
             if (res.status === 200) {
+                window.alert(`Đăng ký tài khoản thành công!!`)
                 nav("/login-user");
             }
             if (res.status === 201) {

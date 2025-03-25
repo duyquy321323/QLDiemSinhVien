@@ -60,8 +60,8 @@ const XemDiem = () => {
                         </thead>
                         <tbody>
                             <tr>
-                                <td>{Diem}</td>
-                                <td>{DiemHe4}</td>
+                            <td>{!Diem? parseFloat(Diem).toFixed(2) : "_"}</td>
+                                <td>{!DiemHe4? parseFloat(DiemHe4).toFixed(2) : "_"}</td>
                                 <td>
                                     {(() => {
                                         switch (true) {
@@ -71,8 +71,10 @@ const XemDiem = () => {
                                                 return 'Khá';
                                             case Diem >= 5:
                                                 return 'Trung bình';
-                                            default:
+                                            case Diem >= 3.5:
                                                 return 'Yếu';
+                                                default: 
+                                                return "Chưa";
                                         }
                                     })()}
                                 </td>
@@ -94,8 +96,8 @@ const XemDiem = () => {
                         <tbody >
                             {DSDiem1.map(c => <tr key={c[2]}>
                                 <td>{c[0]}</td>
-                                <td>{parseFloat(c[1]).toFixed(2)}</td>
-                                <td>{parseFloat(c[2]).toFixed(2)}</td>
+                                <td>{isNaN(c[1])? "_" : parseFloat(c[1]).toFixed(2)}</td>
+                                <td>{isNaN(c[2])? "_" : parseFloat(c[2]).toFixed(2)}</td>
 
                             </tr>
                             )}
