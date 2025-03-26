@@ -7,7 +7,6 @@ package com.quanlydiemsinhvien.qldsv.controllers;
 import java.security.Principal;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -19,9 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.quanlydiemsinhvien.qldsv.converter.TaiKhoanConverter;
 import com.quanlydiemsinhvien.qldsv.dto.GiaoVuDTO;
-import com.quanlydiemsinhvien.qldsv.dto.TaiKhoanDTO;
 import com.quanlydiemsinhvien.qldsv.request.TaiKhoanGiangVienRequest;
 import com.quanlydiemsinhvien.qldsv.service.GiaoVuService;
 import com.quanlydiemsinhvien.qldsv.service.TaiKhoanService;
@@ -39,9 +36,6 @@ public class AdminController {
     @Autowired
     private GiaoVuService giaoVuService;
 
-    @Autowired
-    private TaiKhoanConverter taiKhoanConverter;
-
     @GetMapping("/giaovu/current-giaovu")
     public ResponseEntity<GiaoVuDTO> nameGVu(Principal auth) {
         return ResponseEntity.ok(giaoVuService.getGiaoVu(auth));
@@ -58,8 +52,8 @@ public class AdminController {
     }
 
     @GetMapping("giaovu/taikhoan")
-    public List<TaiKhoanDTO> taikhoan(@RequestParam Map<String, String> params) {
-        return taiKhoanService.getTaiKhoans(params).stream().map(it -> taiKhoanConverter.taiKhoanToTaiKhoanDTO(it)).collect(Collectors.toList());
+    public List<Map<String, Object>> taikhoan(@RequestParam Map<String, String> params) {
+        return taiKhoanService.getTaiKhoans(params);
     }
 
     @PostMapping("/giaovu/taikhoan/dangki")

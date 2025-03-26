@@ -4,16 +4,14 @@
  */
 package com.quanlydiemsinhvien.qldsv.service;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.multipart.MultipartFile;
 
-import com.quanlydiemsinhvien.qldsv.dto.TaiKhoanDTO;
-import com.quanlydiemsinhvien.qldsv.pojo.Taikhoan;
 import com.quanlydiemsinhvien.qldsv.request.LoginRequest;
 import com.quanlydiemsinhvien.qldsv.request.TaiKhoanGiangVienRequest;
 import com.quanlydiemsinhvien.qldsv.request.TaikhoanCreateRequest;
@@ -23,19 +21,19 @@ import com.quanlydiemsinhvien.qldsv.request.TaikhoanCreateRequest;
  * @author Admin
  */
 public interface TaiKhoanService {
-   Taikhoan updateImg(Map<String, String> params, MultipartFile avatar);  
+//    Taikhoan updateImg(Map<String, String> params, MultipartFile avatar);  
 //    boolean addAcount(TaikhoanDTO t);
     boolean addAcountGV(TaiKhoanGiangVienRequest t);
-    List<Taikhoan> getTaiKhoans(Map<String, String> params);
+    List<Map<String, Object>> getTaiKhoans(Map<String, String> params);
     // Taikhoan getUserByUsername(String username);
     UserDetails getLoggedInUserDetails(Authentication authentication);
     boolean createTKSinhVien(Map<String, String> params);
     // String GetIdTaiKhoan(UserDetails userDetails);
-    public ResponseEntity<?> thayDoiMatKhau(Map<String, String> params);
-    void thayDoiMatKhauAD(TaikhoanCreateRequest user);
+    public ResponseEntity<?> thayDoiMatKhau(Map<String, String> params, Principal principal);
+    void thayDoiMatKhauAD(TaikhoanCreateRequest user, Principal principal);
     public Map<String, String> login(LoginRequest user);
     // boolean authUser(String username, String password);
-    TaiKhoanDTO getUserById(String id);
+    Map<String,Object> getUserById(String id);
     boolean sendCode(String email);
 
     // List<Loaitaikhoan> getLoaitaikhoanList(Map<String, String> params);

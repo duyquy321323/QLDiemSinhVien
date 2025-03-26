@@ -5,6 +5,7 @@
 package com.quanlydiemsinhvien.qldsv.controllers;
 
 import java.io.UnsupportedEncodingException;
+import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 
@@ -50,8 +51,8 @@ public class GiangVienController {
     }
 
     @PostMapping("/giaovu/giangvien/add")
-    public ResponseEntity<?> add(@RequestBody GiangvienCreateRequest gv) throws UnsupportedEncodingException {
-        if(gvService.addOrUpdateGiangVien(giangVienConverter.giangVienCreateRequestToGiangVien(gv))){
+    public ResponseEntity<?> add(@RequestBody GiangvienCreateRequest gv, Principal principal) throws UnsupportedEncodingException {
+        if(gvService.addOrUpdateGiangVien(giangVienConverter.giangVienCreateRequestToGiangVien(gv), principal)){
             return ResponseEntity.ok().build();
         }
         return ResponseEntity.badRequest().build();

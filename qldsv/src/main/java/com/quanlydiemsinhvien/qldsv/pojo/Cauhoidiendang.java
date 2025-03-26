@@ -13,8 +13,6 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
@@ -52,9 +50,7 @@ public class Cauhoidiendang implements Serializable {
     @OneToMany(mappedBy = "idCauHoiDienDan", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Traloidiendan> traloidiendanSet;
 
-    @JoinColumn(nullable = false)
-    @ManyToOne
-    private Taikhoan idTaiKhoan;
+    private String idTaiKhoan;
 
     @Override
     public int hashCode() {

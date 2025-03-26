@@ -9,12 +9,11 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.quanlydiemsinhvien.qldsv.pojo.Giaovu;
-import com.quanlydiemsinhvien.qldsv.pojo.Taikhoan;
 
 /**
  *
  * @author FPTSHOP
  */
 public interface GiaoVuRepository extends JpaRepository<Giaovu, Integer> {
-    public Optional<Giaovu> findByIdTaiKhoan(Taikhoan idTaiKhoan);
+    public Optional<Giaovu> findByIdTaiKhoan(String idTaiKhoan);
 }

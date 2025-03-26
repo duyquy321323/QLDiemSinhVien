@@ -4,13 +4,10 @@
  */
 package com.quanlydiemsinhvien.qldsv.pojo;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.*;
-
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Set;
-import javax.persistence.Basic;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -19,16 +16,15 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import javax.persistence.Transient;
-import javax.validation.constraints.NotNull;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 /**
  *
@@ -75,7 +71,7 @@ public class MonhocHocky implements Serializable {
     @ManyToOne
     private Phonghoc phongHoc;
 
-    @OneToMany(mappedBy = "idMonHoc", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "idMonHoc", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE})
     private Set<Monhocdangky> monhocdangkySet;
 
     @Transient

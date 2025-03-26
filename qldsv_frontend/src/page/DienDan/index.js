@@ -63,8 +63,8 @@ const DienDan = () => {
                         <div class="content-question" key={c.idCauHoiDienDan}>
                             <h5>
                                 <i class="fa-solid fa-user icon-padding"></i>
-                                {c.idTaiKhoan.tenTaiKhoan}
-                                {c.idTaiKhoan.chucVu.tenloaitaikhoan == "ROLE_GV"
+                                {c?.taiKhoan?.username}
+                                {c?.taiKhoan? Array.from(c.taiKhoan.chucVu).includes("GV") : false
                                 ? " - Giảng Viên"
                                 : ""}
                             </h5>
@@ -78,12 +78,12 @@ const DienDan = () => {
                                 <i class="fa-solid fa-comment-dots icon-padding"></i>Xem Câu
                                 Trả Lời
                             </Link>
-                            {user.idTaiKhoan === c.idTaiKhoan.idTaiKhoan ? (
+                            {user.id === c?.taiKhoan?.id ? (
                                 <Link to={k} class="text-contend-link update-text-diendan">
                                     <i class="fa-solid fa-pen-to-square icon-padding"></i>Chỉnh Sửa
                                 </Link>
                             ) : null}
-                            {user.idTaiKhoan === c.idTaiKhoan.idTaiKhoan ? (
+                            {user.id === c?.taiKhoan?.id ? (
                                 <a style={{cursor: 'pointer'}} onClick={() => handleDelete(c.idCauHoiDienDan)} class="text-contend-link update-text-diendan">
                                     <i class="fa-solid fa-trash icon-padding"></i>Xóa
                                 </a>

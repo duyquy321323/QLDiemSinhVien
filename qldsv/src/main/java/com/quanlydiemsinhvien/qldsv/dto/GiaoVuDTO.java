@@ -16,5 +16,5 @@ public class GiaoVuDTO {
     private String tenGiaoVu;
     private short gioiTinh;
     private String soDienThoai;
-    private TaiKhoanDTO idTaiKhoan;
+    private String idTaiKhoan;
 }

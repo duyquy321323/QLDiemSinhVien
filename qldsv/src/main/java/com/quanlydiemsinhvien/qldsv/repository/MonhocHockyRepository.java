@@ -20,6 +20,8 @@ public interface MonhocHockyRepository extends JpaRepository<MonhocHocky, Intege
 
     MonhocHocky findByIdMonHocAndIdHocky_IdHocKy(Monhoc idMonHoc, Integer idHocKy);
 
+    MonhocHocky findByIdMonHoc_IdMonHocAndIdHocky_IdHocKy(Integer idMonHoc, Integer idHocKy);
+
     List<MonhocHocky> findByIdGiangVienAndIdHocky_NgayBatDauLessThanEqualAndIdHocky_NgayKetThucGreaterThanEqual(Giangvien idGiangvien, Date currentDate, Date currentDate2);
 
     List<MonhocHocky> findByIdGiangVienAndIdHocky_NgayBatDauGreaterThan(Giangvien idGiangvien, Date currentDate);

@@ -6,10 +6,6 @@ package com.quanlydiemsinhvien.qldsv.pojo;
 
 import java.io.Serializable;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import com.quanlydiemsinhvien.qldsv.converter.MonHocDangKyConverter;
 import com.quanlydiemsinhvien.qldsv.dto.MonhocdangkyDTO;
 
 import lombok.AllArgsConstructor;

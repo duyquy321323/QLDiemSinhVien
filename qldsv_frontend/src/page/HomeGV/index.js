@@ -11,7 +11,7 @@ const HomeGV = () => {
     const loadMonHoc = async () => {
       try {
         let e = endpoints["monHocIdTK"];
-        e = `${e}?taiKhoanId=${user === null ? "" : user.idTaiKhoan}`;
+        e = `${e}?taiKhoanId=${user === null ? "" : user.id}`;
         let res = await api().get(e);
         setMonHoc(res.data);
       } catch (e) { 

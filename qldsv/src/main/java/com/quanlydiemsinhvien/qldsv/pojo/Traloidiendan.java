@@ -47,9 +47,7 @@ public class Traloidiendan implements Serializable {
     @ManyToOne
     private Cauhoidiendang idCauHoiDienDan;
 
-    @JoinColumn(nullable = false)
-    @ManyToOne
-    private Taikhoan idTaiKhoan;
+    private String idTaiKhoan;
 
     @Override
     public int hashCode() {

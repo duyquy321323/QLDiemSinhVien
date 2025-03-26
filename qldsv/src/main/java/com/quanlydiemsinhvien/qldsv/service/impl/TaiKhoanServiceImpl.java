@@ -4,22 +4,19 @@
  */
 package com.quanlydiemsinhvien.qldsv.service.impl;
 
-import java.io.IOException;
+import java.security.Principal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.persistence.NoResultException;
 
 import org.hibernate.HibernateException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -35,23 +32,18 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.multipart.MultipartFile;
 
 import com.cloudinary.Cloudinary;
-import com.cloudinary.utils.ObjectUtils;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.quanlydiemsinhvien.qldsv.components.VerificationCodeStore;
 import com.quanlydiemsinhvien.qldsv.converter.GiangVienConverter;
 import com.quanlydiemsinhvien.qldsv.converter.SinhVienConverter;
-import com.quanlydiemsinhvien.qldsv.converter.TaiKhoanConverter;
-import com.quanlydiemsinhvien.qldsv.dto.TaiKhoanDTO;
 import com.quanlydiemsinhvien.qldsv.pojo.Giangvien;
 import com.quanlydiemsinhvien.qldsv.pojo.Sinhvien;
 import com.quanlydiemsinhvien.qldsv.pojo.Taikhoan;
 import com.quanlydiemsinhvien.qldsv.repository.GiangvienRepository;
 import com.quanlydiemsinhvien.qldsv.repository.SinhVienRepository;
-import com.quanlydiemsinhvien.qldsv.repository.TaiKhoanRepository;
 import com.quanlydiemsinhvien.qldsv.request.LoginRequest;
 import com.quanlydiemsinhvien.qldsv.request.TaiKhoanGiangVienRequest;
 import com.quanlydiemsinhvien.qldsv.request.TaikhoanCreateRequest;
@@ -74,12 +66,6 @@ public class TaiKhoanServiceImpl implements TaiKhoanService {
 
     @Autowired
     private GiangvienRepository giangvienRepository;
-
-    @Autowired
-    private TaiKhoanRepository taikhoanRepository;
-
-    @Autowired
-    private TaiKhoanConverter taiKhoanConverter;
 
     @Autowired
     private JavaMailSender emailSender;
@@ -105,21 +91,21 @@ public class TaiKhoanServiceImpl implements TaiKhoanService {
     @Autowired
     private SinhVienConverter sinhVienConverter;
 
-    @Override
-    public Taikhoan updateImg(Map<String, String> params, MultipartFile avatar) {
-        Taikhoan tk = taikhoanRepository.findById(params.get("idTaiKhoan"))
-                .orElseThrow(() -> new RuntimeException("Tài khoản không tồn tại!"));
-        if (!avatar.isEmpty()) {
-            try {
-                Map r = this.cloudinary.uploader().upload(avatar.getBytes(),
-                        ObjectUtils.asMap("resource_type", "auto"));
-                tk.setImage(r.get("secure_url").toString());
-            } catch (IOException ex) {
-                Logger.getLogger(TaiKhoanService.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
-        return taikhoanRepository.save(tk);
-    }
+    // @Override
+    // public Taikhoan updateImg(Map<String, String> params, MultipartFile avatar) {
+    //     Taikhoan tk = taikhoanRepository.findById(params.get("idTaiKhoan"))
+    //             .orElseThrow(() -> new RuntimeException("Tài khoản không tồn tại!"));
+    //     if (!avatar.isEmpty()) {
+    //         try {
+    //             Map r = this.cloudinary.uploader().upload(avatar.getBytes(),
+    //                     ObjectUtils.asMap("resource_type", "auto"));
+    //             tk.setImage(r.get("secure_url").toString());
+    //         } catch (IOException ex) {
+    //             Logger.getLogger(TaiKhoanService.class.getName()).log(Level.SEVERE, null, ex);
+    //         }
+    //     }
+    //     return taikhoanRepository.save(tk);
+    // }
 
     // @Override
     // public boolean addAcount(Taikhoan t) {
@@ -169,8 +155,7 @@ public class TaiKhoanServiceImpl implements TaiKhoanService {
                     if (keycloakUserId == null) {
                         return false; // Nếu tạo tài khoản trên Keycloak thất bại thì không lưu vào database
                     }
-                    gv.setIdTaiKhoan(Taikhoan.builder()
-                    .idTaiKhoan(keycloakUserId).build());
+                    gv.setIdTaiKhoan(keycloakUserId);
                     giangvienRepository.save(gv);
                 }
                 // Gửi email thông báo
@@ -190,9 +175,14 @@ public class TaiKhoanServiceImpl implements TaiKhoanService {
     }
 
     @Override
-    public List<Taikhoan> getTaiKhoans(Map<String, String> params) {
-        PageRequest pageRequest = PageRequest.of(0, 100);
-        return taikhoanRepository.findAll(pageRequest).toList();
+    public List<Map<String, Object>> getTaiKhoans(Map<String, String> params) {
+        List<Map<String, Object>> result = keycloakUserService.getAllUsers();
+        for(int i = 0; i < result.size(); i++){
+            List<String> roles = keycloakUserService.getUserRoles(result.get(i).get("id").toString());
+            roles.remove("default-roles-qlydiemsinhvien");
+            result.get(i).put("chucVu", roles);
+        }
+        return result;
     }
 
     // @Override
@@ -241,7 +231,7 @@ public class TaiKhoanServiceImpl implements TaiKhoanService {
                         .build();
                 if (sinhvien.getIdTaiKhoan() == null && sinhvien.getEmail() != null
                         && Objects.equals(storedCode, u.getMaXacNhan())) {
-                    sinhvien.setIdTaiKhoan(u);
+                    sinhvien.setIdTaiKhoan(u.getIdTaiKhoan());
                     sinhVienRepository.save(sinhvien);
                     return true;
                 }
@@ -270,24 +260,23 @@ public class TaiKhoanServiceImpl implements TaiKhoanService {
     // }
 
     @Override
-    public ResponseEntity<?> thayDoiMatKhau(Map<String, String> params) {
-        String userId = keycloakUserService.getUserIdByUsername(params.get("tenTaiKhoan"));
-        if(!keycloakUserService.checkOldPassword(params.get("tenTaiKhoan"), params.get("matKhau"))){
+    public ResponseEntity<?> thayDoiMatKhau(Map<String, String> params, Principal principal) {
+        String userName = keycloakUserService.getUsernameByUserId(principal.getName());
+        if(!keycloakUserService.checkOldPassword(userName , params.get("matKhau"))){
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        if(!keycloakUserService.updateUserPassword(userId, params.get("matKhauMoi"))){
+        if(!keycloakUserService.updateUserPassword(principal.getName(), params.get("matKhauMoi"))){
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     @Override
-    public void thayDoiMatKhauAD(TaikhoanCreateRequest user) {
-        Taikhoan taikhoan = user.getIdTaiKhoan() == null? null : taikhoanRepository.findById(user.getIdTaiKhoan()).orElse(null);
-        if(taikhoan == null || !keycloakUserService.checkOldPassword(keycloakUserService.getUsernameByUserId(taikhoan.getIdTaiKhoan()), user.getMatKhau())){
+    public void thayDoiMatKhauAD(TaikhoanCreateRequest user, Principal principal) {
+        if(!keycloakUserService.checkOldPassword(keycloakUserService.getUsernameByUserId(principal.getName()), user.getMatKhau())){
             throw new RuntimeException("Thay đổi mật khẩu thất bại!");
         }
-        if (keycloakUserService.updateUserPassword(user.getIdTaiKhoan(), user.getMkMoi())) {
+        if (keycloakUserService.updateUserPassword(principal.getName(), user.getMkMoi())) {
             return;
         }
         throw new RuntimeException("Thay đổi mật khẩu thất bại!");
@@ -340,9 +329,12 @@ public class TaiKhoanServiceImpl implements TaiKhoanService {
     // }
 
     @Override
-    public TaiKhoanDTO getUserById(String id) {
-        return taiKhoanConverter.taiKhoanToTaiKhoanDTO(
-                taikhoanRepository.findById(id).get());
+    public Map<String,Object> getUserById(String id) {
+        Map<String, Object> info = keycloakUserService.getUserById(id);
+        List<String> roles = keycloakUserService.getUserRoles(id);
+            roles.remove("default-roles-qlydiemsinhvien");
+            info.put("chucVu", roles);
+        return info;
     }
 
     @Override
@@ -402,7 +394,7 @@ public class TaiKhoanServiceImpl implements TaiKhoanService {
 
     @Override
     public long countTaiKhoan() {
-        return taikhoanRepository.count();
+        return keycloakUserService.getAllUsers().size();
     }
 
     @Override

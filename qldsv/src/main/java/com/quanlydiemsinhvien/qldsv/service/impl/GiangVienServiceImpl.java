@@ -4,6 +4,7 @@
  */
 package com.quanlydiemsinhvien.qldsv.service.impl;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -58,11 +59,11 @@ public class GiangVienServiceImpl implements GiangVienService {
     }
 
     @Override
-    public boolean addOrUpdateGiangVien(Giangvien gv) {
+    public boolean addOrUpdateGiangVien(Giangvien gv, Principal principal) {
         try{
             giangVienRepository.save(gv);
             if(gv != null && gv.getIdTaiKhoan() != null){
-                keycloakUserService.updateUser(gv.getIdTaiKhoan().getIdTaiKhoan(), gv.getEmail(), gv.getHoTen());
+                keycloakUserService.updateUser(principal.getName(), gv.getEmail(), gv.getHoTen());
             }
             return true;
         } catch(Exception e){
@@ -81,7 +82,7 @@ public class GiangVienServiceImpl implements GiangVienService {
         try {
             Giangvien giangvien = giangVienRepository.findById(idGiangVien).orElse(null);
             if(giangvien != null && giangvien.getIdTaiKhoan() != null){
-                keycloakUserService.deleteUser(giangvien.getIdTaiKhoan().getIdTaiKhoan());
+                keycloakUserService.deleteUser(giangvien.getIdTaiKhoan());
             }
             giangVienRepository.deleteGiangVienById(idGiangVien);
             return true;
@@ -90,10 +91,10 @@ public class GiangVienServiceImpl implements GiangVienService {
             return false;
         }
     }
-
+    
     @Override
     public GiangVienDTO getGiangVienByIdTaiKhoan(String idTaiKhoan) {
-        return giangVienConverter.giangVienToGiangVienDTO(giangVienRepository.findByIdTaiKhoan_IdTaiKhoan(idTaiKhoan).orElseThrow(() -> new RuntimeException("Tài khoản này không phải là giảng viên!")));
+        return giangVienConverter.giangVienToGiangVienDTO(giangVienRepository.findByIdTaiKhoan(idTaiKhoan).orElseThrow(() -> new RuntimeException("Tài khoản này không phải là giảng viên!")));
     }
 
 

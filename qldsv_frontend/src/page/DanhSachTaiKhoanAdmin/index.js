@@ -46,13 +46,14 @@ import { api } from "../../api";
         try {
           const response = await api().get("/giaovu/taikhoan");
           setStudents(response.data);
+          console.log(response.data);
         } catch (error) {
           console.error("Error fetching students:", error);
         }
       };
     
       const filteredStudents = students.filter((sv) =>
-        sv?.tenTaiKhoan?.toLowerCase().includes(search.toLowerCase())
+        sv?.firstName?.toLowerCase().includes(search.toLowerCase())
       );
     
       const totalPages = Math.ceil(filteredStudents.length / itemsPerPage);
@@ -91,11 +92,11 @@ import { api } from "../../api";
                 </TableHead>
                 <TableBody>
                   {paginatedStudents.map((row) => (
-                    <StyledTableRow key={row.idTaiKhoan}>
+                    <StyledTableRow key={row.id}>
                       <StyledTableCell component="th" scope="row">
-                        {row.idTaiKhoan}
+                        {row.id}
                       </StyledTableCell>
-                      <StyledTableCell align="right">{row.tenTaiKhoan}</StyledTableCell>
+                      <StyledTableCell align="right">{row.email}</StyledTableCell>
                       <StyledTableCell align="center">
                         {Array.from(row.chucVu).length > 0 ? Array.from(row.chucVu).at(0) : ""}
                       </StyledTableCell>

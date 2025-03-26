@@ -4,6 +4,7 @@
  */
 package com.quanlydiemsinhvien.qldsv.service;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 
@@ -17,9 +18,9 @@ import com.quanlydiemsinhvien.qldsv.request.TraloidiendanRequest;
  * @author Admin
  */
 public interface DienDanService {
-    Object getCauHoi(Map<String, String> params);
-    boolean addOrUpdateTraloi(TraloidiendanRequest p);
-    boolean addOrUpdateCauHoi(CauhoidiendangRequest p);
+    Object getCauHoi(Map<String, String> params, Principal principal);
+    boolean addOrUpdateTraloi(TraloidiendanRequest p, Principal principal);
+    boolean addOrUpdateCauHoi(CauhoidiendangRequest p, Principal principal);
     List<CauhoidiendangDTO> getCauHoiDienDan();
     List<TraloidiendanDTO> getTraloi(Map<String, String> params);
     boolean deleteCauHoi(Map<String, String> params);

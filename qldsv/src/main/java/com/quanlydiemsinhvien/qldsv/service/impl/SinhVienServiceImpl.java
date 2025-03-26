@@ -62,7 +62,7 @@ public class SinhVienServiceImpl implements SinhVienService {
 
     @Override
     public SinhVienDTO getSinhvien(String idTaiKhoan) {
-        return sinhVienConverter.sinhVienToSinhVienDTO(sinhvienRepository.findByIdTaiKhoan_IdTaiKhoan(idTaiKhoan).orElseThrow(() -> new RuntimeException("Tài khoản này không phải là sinh viên!")));
+        return sinhVienConverter.sinhVienToSinhVienDTO(sinhvienRepository.findByIdTaiKhoan(idTaiKhoan).orElseThrow(() -> new RuntimeException("Tài khoản này không phải là sinh viên!")));
     }
 
     @Override
@@ -88,7 +88,7 @@ public class SinhVienServiceImpl implements SinhVienService {
         try {
             Sinhvien sinhvien = sv.getIdSinhVien() == null? null : sinhvienRepository.findById(sv.getIdSinhVien()).orElse(null);
             if(sinhvien != null && sinhvien.getIdTaiKhoan() != null){
-                keycloakUserService.updateUser(sinhvien.getIdTaiKhoan().getIdTaiKhoan(), sv.getEmail(), sv.getHoTen());
+                keycloakUserService.updateUser(sinhvien.getIdTaiKhoan(), sv.getEmail(), sv.getHoTen());
             }
             sinhvienRepository.save(sinhVienConverter.sinhVienDTOToSinhVien(sv));
             return true;
@@ -109,7 +109,7 @@ public class SinhVienServiceImpl implements SinhVienService {
         try{
             Sinhvien sinhvien = sinhvienRepository.findById(idSinhVien).orElse(null);
             if(sinhvien != null && sinhvien.getIdTaiKhoan() != null){
-                keycloakUserService.deleteUser(sinhvien.getIdTaiKhoan().getIdTaiKhoan());
+                keycloakUserService.deleteUser(sinhvien.getIdTaiKhoan());
             }
             sinhvienRepository.deleteById(idSinhVien);
         } catch (Exception e) {

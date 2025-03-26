@@ -4,6 +4,8 @@
  */
 package com.quanlydiemsinhvien.qldsv.controllers;
 
+import java.security.Principal;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,11 +35,11 @@ public class ThayDoiMatKhauController {
     // }
 
     @PostMapping("/giaovu/thaydoimatkhau")
-    public ResponseEntity<?> doiMatKhau(@RequestBody TaikhoanCreateRequest tk) {
+    public ResponseEntity<?> doiMatKhau(@RequestBody TaikhoanCreateRequest tk, Principal principal) {
         if (tk.getMatKhau().isEmpty() || tk.getXacNhanMk().isEmpty() || tk.getMkMoi().isEmpty()) {
             return ResponseEntity.badRequest().build();
         } else if (tk.getMkMoi().equals(tk.getXacNhanMk())) {
-            this.tkService.thayDoiMatKhauAD(tk);
+            this.tkService.thayDoiMatKhauAD(tk, principal);
             return ResponseEntity.status(HttpStatus.OK).build();
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();

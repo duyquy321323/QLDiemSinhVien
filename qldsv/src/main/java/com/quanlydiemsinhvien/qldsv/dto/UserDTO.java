@@ -18,5 +18,5 @@ public class UserDTO {
     private Short gioiTinh;
     private String soDienThoai;
     private String email;
-    private TaiKhoanDTO idTaiKhoan;
+    private String idTaiKhoan;
 }

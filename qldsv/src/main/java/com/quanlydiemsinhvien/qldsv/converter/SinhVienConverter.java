@@ -21,9 +21,6 @@ public class SinhVienConverter {
     private ModelMapper modelMapper;
 
     @Autowired
-    private TaiKhoanConverter taiKhoanConverter;
-
-    @Autowired
     private LopHocConverter lopHocConverter;
 
     @Autowired
@@ -34,7 +31,6 @@ public class SinhVienConverter {
 
     public SinhVienDTO sinhVienToSinhVienDTO(Sinhvien sinhvien){
         SinhVienDTO sinhVienDTO = modelMapper.map(sinhvien, SinhVienDTO.class);
-        sinhVienDTO.setIdTaiKhoan((sinhvien.getIdTaiKhoan() == null? null : taiKhoanConverter.taiKhoanToTaiKhoanDTO(sinhvien.getIdTaiKhoan())));
         sinhVienDTO.setMaLop(lopHocConverter.lopHocToLopHocDTO(sinhvien.getMaLop()));
         return sinhVienDTO;
     }

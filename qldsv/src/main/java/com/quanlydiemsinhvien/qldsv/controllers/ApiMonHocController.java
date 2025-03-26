@@ -4,6 +4,7 @@
  */
 package com.quanlydiemsinhvien.qldsv.controllers;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -87,8 +88,8 @@ public class ApiMonHocController {
     }
     @PostMapping("/api/monhochocky/")
     @CrossOrigin
-    public ResponseEntity<List<MonhocHockyDTO>> listMHHK(@RequestParam Map<String, String> params){
-        return new ResponseEntity<>(monHocService.getMonHocHocKy(params).stream().map(it -> monHocHocKyConverter.monhocHockyToMonhocHockyDTO(it)).collect(Collectors.toList()), HttpStatus.OK);
+    public ResponseEntity<List<MonhocHockyDTO>> listMHHK(@RequestParam Map<String, String> params, Principal principal){
+        return new ResponseEntity<>(monHocService.getMonHocHocKy(params, principal).stream().map(it -> monHocHocKyConverter.monhocHockyToMonhocHockyDTO(it)).collect(Collectors.toList()), HttpStatus.OK);
     }
     
     @GetMapping("/api/monhocSVdangky/")

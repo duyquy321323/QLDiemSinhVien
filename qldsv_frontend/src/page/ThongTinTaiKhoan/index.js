@@ -18,17 +18,17 @@ const Thongtintaikhoan = () => {
 
 
     const [taiKhoan, setTaiKhoan] = useState({
-        "idTaiKhoan": user? user.idTaiKhoan : null,
-        "tenTaiKhoan": user? user.tenTaiKhoan : null,
-        "matKhau": user? user.matKhau : null,
-        "chucVu": user? user.chucVu.tenloaitaikhoan : null,
+        "idTaiKhoan": user? user.id : null,
+        "tenTaiKhoan": user? user.username : null,
+        "matKhau": user? user.passwowrd : null,
+        "chucVu": user? Array.from(user.chucVu).at(0) : null,
     });
 
     useEffect(() => {
         async function getInformationSinhVien(){
             try{
                 let url;
-                if(user.chucVu.tenloaitaikhoan === 'ROLE_SV'){
+                if(Array.from(user.chucVu).includes('SV')){
                     url = endpoints['current-sinhvien']
                 } else {
                     url = endpoints['current-giangvien'];
@@ -89,7 +89,7 @@ const Thongtintaikhoan = () => {
         <div class="contend">
             <div class="info-user">
                 <div class="info-title-user">
-                    {user === null || user?.idTaiKhoan?.image === null ? <p class="info-user-image"><i class="fa-solid fa-user icon-padding"></i></p> : <div class="info-user-image-2" ><img class="img-user-avatar" src={user?.idTaiKhoan?.image} alt="Ảnh đại diện" /></div>}
+                    {user === null || user?.id?.image === null ? <p class="info-user-image"><i class="fa-solid fa-user icon-padding"></i></p> : <div class="info-user-image-2" ><img class="img-user-avatar" src={user?.idTaiKhoan?.image} alt="Ảnh đại diện" /></div>}
 
                     <Form onSubmit={updateImage}>
                         <Form.Group className="mb-3">

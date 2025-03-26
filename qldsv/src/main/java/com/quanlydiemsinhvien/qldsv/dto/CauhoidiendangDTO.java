@@ -1,5 +1,7 @@
 package com.quanlydiemsinhvien.qldsv.dto;
 
+import java.util.Map;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -15,5 +17,5 @@ public class CauhoidiendangDTO {
     private Integer idCauHoiDienDan;
     private String noiDungCauHoi;
     private String ngayTao;
-    private TaiKhoanDTO idTaiKhoan;
+    private Map<String, Object> taiKhoan;
 }

@@ -4,6 +4,7 @@
  */
 package com.quanlydiemsinhvien.qldsv.service.impl;
 
+import java.security.Principal;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -31,13 +32,11 @@ import com.quanlydiemsinhvien.qldsv.pojo.Monhoc;
 import com.quanlydiemsinhvien.qldsv.pojo.MonhocHocky;
 import com.quanlydiemsinhvien.qldsv.pojo.Monhocdangky;
 import com.quanlydiemsinhvien.qldsv.pojo.Sinhvien;
-import com.quanlydiemsinhvien.qldsv.pojo.Taikhoan;
 import com.quanlydiemsinhvien.qldsv.repository.GiangvienRepository;
 import com.quanlydiemsinhvien.qldsv.repository.MonHocRepository;
 import com.quanlydiemsinhvien.qldsv.repository.MonhocHockyRepository;
 import com.quanlydiemsinhvien.qldsv.repository.MonhocdangkyRepository;
 import com.quanlydiemsinhvien.qldsv.repository.SinhVienRepository;
-import com.quanlydiemsinhvien.qldsv.repository.TaiKhoanRepository;
 import com.quanlydiemsinhvien.qldsv.service.MonHocService;
 
 /**
@@ -55,8 +54,6 @@ public class MonHocServiceImpl  implements MonHocService{
     private MonhocHockyRepository monhocHocKyRepository;
     @Autowired
     private GiangvienRepository giangvienRepository;
-    @Autowired
-    private TaiKhoanRepository taiKhoanRepository;
     @Autowired
     private SinhVienRepository sinhVienRepository;
     @Autowired
@@ -129,8 +126,7 @@ public class MonHocServiceImpl  implements MonHocService{
     @Override
     public List<MonhocHockyDTO> getMonHocByGiangVien(Map<String, String> params) {
         String idTaiKhoan = params.get("taiKhoanId");
-        Taikhoan taikhoan = taiKhoanRepository.findById(idTaiKhoan).orElseThrow(() -> new RuntimeException("Tài khoản không tồn tại!"));
-        Giangvien giangvien = giangvienRepository.findByIdTaiKhoan(taikhoan).orElseThrow(() -> new RuntimeException("Tài khoản không phải là giáo viên!"));
+        Giangvien giangvien = giangvienRepository.findByIdTaiKhoan(idTaiKhoan).orElseThrow(() -> new RuntimeException("Tài khoản không phải là giáo viên!"));
         Date currentDate = Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant());
         return monhocHocKyRepository.findByIdGiangVienAndIdHocky_NgayBatDauLessThanEqualAndIdHocky_NgayKetThucGreaterThanEqual(giangvien, currentDate, currentDate)
                 .stream().map(it -> monHocHocKyConverter.monhocHockyToMonhocHockyDTO(it)).collect(Collectors.toList());
@@ -157,11 +153,10 @@ public class MonHocServiceImpl  implements MonHocService{
     }
 
     @Override
-    public List<MonhocHocky> getMonHocHocKy(Map<String, String> params) {
+    public List<MonhocHocky> getMonHocHocKy(Map<String, String> params, Principal principal) {
         String tenMonHoc = params.get("tenMonHoc");
-        String idTaiKhoan = params.get("idTaiKhoan");
-        Taikhoan taikhoan = taiKhoanRepository.findById(idTaiKhoan).orElseThrow(() -> new RuntimeException("Tài khoản không tồn tại!"));
-        Sinhvien sinhvien = sinhVienRepository.findByIdTaiKhoan(taikhoan).orElseThrow(() -> new RuntimeException("Tài khoản này không phải là sinh viên!"));
+        String idTaiKhoan = principal.getName();
+        Sinhvien sinhvien = sinhVienRepository.findByIdTaiKhoan(idTaiKhoan).orElseThrow(() -> new RuntimeException("Tài khoản này không phải là sinh viên!"));
         String idLopHoc = sinhvien.getMaLop().getIdLopHoc().toString();
         Date currentDate = Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant());
         if(tenMonHoc != null){
@@ -183,8 +178,7 @@ public class MonHocServiceImpl  implements MonHocService{
     @Override
     public List<MonhocHockyDTO> getMonHocByGiangVienChuaDay(Map<String, String> params) {
         String idTaiKhoan = params.get("taiKhoanId");
-        Taikhoan taikhoan = taiKhoanRepository.findById(idTaiKhoan).orElseThrow(() -> new RuntimeException("Tài khoản không tồn tại!"));
-        Giangvien giangvien = giangvienRepository.findByIdTaiKhoan(taikhoan).orElseThrow(() -> new RuntimeException("Tài khoản không phải là giáo viên!"));
+        Giangvien giangvien = giangvienRepository.findByIdTaiKhoan(idTaiKhoan).orElseThrow(() -> new RuntimeException("Tài khoản không phải là giáo viên!"));
         Date currentDate = Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant());
         return monhocHocKyRepository.findByIdGiangVienAndIdHocky_NgayBatDauGreaterThan(giangvien, currentDate).stream().map(it -> monHocHocKyConverter.monhocHockyToMonhocHockyDTO(it)).collect(Collectors.toList());
     }
@@ -192,8 +186,7 @@ public class MonHocServiceImpl  implements MonHocService{
     @Override
     public List<MonhocHockyDTO> getMonHocByGiangVienDaDay(Map<String, String> params) {
         String idTaiKhoan = params.get("taiKhoanId");
-        Taikhoan taikhoan = taiKhoanRepository.findById(idTaiKhoan).orElseThrow(() -> new RuntimeException("Tài khoản không tồn tại!"));
-        Giangvien giangvien = giangvienRepository.findByIdTaiKhoan(taikhoan).orElseThrow(() -> new RuntimeException("Tài khoản không phải là giáo viên!"));
+        Giangvien giangvien = giangvienRepository.findByIdTaiKhoan(idTaiKhoan).orElseThrow(() -> new RuntimeException("Tài khoản không phải là giáo viên!"));
         Date currentDate = Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant());
         return monhocHocKyRepository.findByIdGiangVienAndIdHocky_NgayKetThucLessThan(giangvien, currentDate).stream().map(it -> monHocHocKyConverter.monhocHockyToMonhocHockyDTO(it)).collect(Collectors.toList());
     }

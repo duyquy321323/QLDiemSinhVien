@@ -51,7 +51,13 @@ public class MonhocHocKyServiceImpl implements MonhocHocKyService {
     public void dangKyMonHocAdmin(Integer idHK, List<MonHocHocKyCreateRequest> requests) {
         try {
             Hocky hocky = hocKyRepository.findById(idHK).orElse(null);
-            monHocHockyRepository.saveAll(requests.stream().filter(it -> it.getNgayBatDau() != null).collect(Collectors.toList()).stream().map(it -> monHocHocKyConverter.monhocHockyCreateRequestToMonHocHocKy(it, hocky)).collect(Collectors.toList()));
+            List<MonhocHocky> monhocHockys = requests.stream().filter(it -> it.getNgayBatDau() != null).collect(Collectors.toList()).stream().map(it -> monHocHocKyConverter.monhocHockyCreateRequestToMonHocHocKy(it, hocky)).collect(Collectors.toList());
+            List<MonhocHocky> monhocHockyDBLoad = monhocHockys.stream().map(it -> {
+                MonhocHocky mhhk = monHocHockyRepository.findByIdMonHoc_IdMonHocAndIdHocky_IdHocKy(it.getIdMonHoc().getIdMonHoc(), it.getIdHocky().getIdHocKy());
+                it.setIdMonHocHocKy(mhhk == null? null : mhhk.getIdMonHocHocKy());
+                return it;
+            }).collect(Collectors.toList());
+            monHocHockyRepository.saveAll(monhocHockyDBLoad);
             List<MonHocHocKyCreateRequest> monhocHockyDeleteList = requests.stream().filter(it -> it.getNgayBatDau() == null).collect(Collectors.toList());
             for(MonHocHocKyCreateRequest mhhk : monhocHockyDeleteList){
                 Monhoc monhoc = monHocRepository.findById(mhhk.getIdMonHoc()).orElse(null);

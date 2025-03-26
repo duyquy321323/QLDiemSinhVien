@@ -21,12 +21,8 @@ public class GiangVienConverter {
     @Autowired
     private GiangvienRepository giangvienRepository;
 
-    @Autowired
-    private TaiKhoanConverter taiKhoanConverter;
-
     public GiangVienDTO giangVienToGiangVienDTO(Giangvien giangVien){
         GiangVienDTO giangVienDTO = modelMapper.map(giangVien, GiangVienDTO.class);
-        giangVienDTO.setIdTaiKhoan(giangVien.getIdTaiKhoan() == null? null : taiKhoanConverter.taiKhoanToTaiKhoanDTO(giangVien.getIdTaiKhoan()));
         return giangVienDTO;
     }
 

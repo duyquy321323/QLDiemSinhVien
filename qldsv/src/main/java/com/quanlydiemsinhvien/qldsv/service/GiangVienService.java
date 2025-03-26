@@ -4,6 +4,7 @@
  */
 package com.quanlydiemsinhvien.qldsv.service;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 
@@ -18,7 +19,7 @@ import com.quanlydiemsinhvien.qldsv.pojo.Giangvien;
  */
 public interface GiangVienService {
     Page<GiangVienDTO> getGiangvienList(Map<String, String> params, int page, int pageSize);
-    boolean addOrUpdateGiangVien(Giangvien gv);
+    boolean addOrUpdateGiangVien(Giangvien gv, Principal principal);
     GiangVienDTO getGiangVienById(Integer idGiangVien);
     boolean deleteById(Integer idGiangVien);
     GiangVienDTO getGiangVienByIdTaiKhoan(String idTaiKhoan);

@@ -14,15 +14,13 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.quanlydiemsinhvien.qldsv.pojo.Giangvien;
-import com.quanlydiemsinhvien.qldsv.pojo.Taikhoan;
 
 /**
  *
  * @author FPTSHOP
  */
 public interface GiangvienRepository extends JpaRepository<Giangvien, Integer> {
-    Optional<Giangvien> findByIdTaiKhoan(Taikhoan idTaiKhoan);
-    Optional<Giangvien> findByIdTaiKhoan_IdTaiKhoan(String idTaiKhoan);
+    Optional<Giangvien> findByIdTaiKhoan(String idTaiKhoan);
     Page<Giangvien> findByHoTenContaining(String hoTen, Pageable pageable);
 
     @Modifying

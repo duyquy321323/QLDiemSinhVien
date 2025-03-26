@@ -11,7 +11,7 @@ const DanhSachMonChuaDay = () => {
     const loadMonHoc = async () => {
       try {
         let e = endpoints["DSMHChuaDay"];
-        e = `${e}?taiKhoanId=${user === null ? "" : user.idTaiKhoan}`;
+        e = `${e}?taiKhoanId=${user === null ? "" : user.id}`;
         let res = await api().get(e);
         console.log(res.data);
         setMonHoc(res.data);

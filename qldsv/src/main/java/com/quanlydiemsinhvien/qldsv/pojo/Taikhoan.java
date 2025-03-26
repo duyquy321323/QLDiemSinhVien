@@ -5,15 +5,7 @@
 package com.quanlydiemsinhvien.qldsv.pojo;
 
 import java.io.Serializable;
-import java.util.Set;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import lombok.AllArgsConstructor;
@@ -26,8 +18,8 @@ import lombok.Setter;
  *
  * @author FPTSHOP
  */
-@Entity
-@Table(name = "taikhoan")
+// @Entity
+// @Table(name = "taikhoan")
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -35,9 +27,9 @@ import lombok.Setter;
 @Setter
 public class Taikhoan implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    // private static final long serialVersionUID = 1L;
 
-    @Id
+    // @Id
     private String idTaiKhoan;
 
     // @Column(nullable = false, length = 50)
@@ -46,35 +38,35 @@ public class Taikhoan implements Serializable {
     // @Column(name = "MatKhau", nullable = false, length = 100)
     // private String matKhau;
 
-    @Column(length = 1000)
-    private String image;
+    // @Column(length = 1000)
+    // private String image;
 
-    @OneToMany(mappedBy = "idTaiKhoan", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Traloidiendan> traloidiendanSet;
+    // @OneToMany(mappedBy = "idTaiKhoan", cascade = CascadeType.ALL, orphanRemoval = true)
+    // private Set<Traloidiendan> traloidiendanSet;
 
-    // @JoinColumn(name = "ChucVu", nullable = false)
-    // @ManyToOne
-    // private Loaitaikhoan chucVu;
+    // // @JoinColumn(name = "ChucVu", nullable = false)
+    // // @ManyToOne
+    // // private Loaitaikhoan chucVu;
 
-    @OneToMany(mappedBy = "idTaiKhoan", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Cauhoidiendang> cauhoidiendangSet;
+    // @OneToMany(mappedBy = "idTaiKhoan", cascade = CascadeType.ALL, orphanRemoval = true)
+    // private Set<Cauhoidiendang> cauhoidiendangSet;
 
-    @OneToOne(mappedBy = "idTaiKhoan", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Giangvien giangvien;
+    // @OneToOne(mappedBy = "idTaiKhoan", cascade = CascadeType.ALL, orphanRemoval = true)
+    // private Giangvien giangvien;
 
-    @OneToOne(mappedBy = "idTaiKhoan", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Giaovu giaovu;
+    // @OneToOne(mappedBy = "idTaiKhoan", cascade = CascadeType.ALL, orphanRemoval = true)
+    // private Giaovu giaovu;
 
-    @OneToOne(mappedBy = "idTaiKhoan", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Sinhvien sinhvien;
+    // @OneToOne(mappedBy = "idTaiKhoan", cascade = CascadeType.ALL, orphanRemoval = true)
+    // private Sinhvien sinhvien;
 
-    @Transient
+    // @Transient
     private String xacNhanMk;
 
-    @Transient
+    // @Transient
     private String mkMoi;
 
-    @Transient
+    // @Transient
     private Integer maXacNhan;
 
     @Override

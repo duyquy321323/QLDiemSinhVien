@@ -47,7 +47,7 @@ public class Monhoc implements Serializable {
     @Column(nullable = false)
     private int soTinChi;
 
-    @OneToMany(mappedBy = "idMonHoc", cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REMOVE})
+    @OneToMany(mappedBy = "idMonHoc", cascade = {CascadeType.ALL}, orphanRemoval = true)
     private Set<MonhocHocky> monhocHockySet;
 
     @Override

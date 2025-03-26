@@ -1,6 +1,7 @@
 package com.quanlydiemsinhvien.qldsv.service;
 
 import java.util.List;
+import java.util.Map;
 
 import com.quanlydiemsinhvien.qldsv.dto.UserDTO;
 
@@ -15,4 +16,6 @@ public interface KeycloakUserService {
     public String getUsernameByUserId(String userId) ;
     public List<String> getUserRoles(String userId);
     public String getUserIdByUsername(String username);
+    public List<Map<String, Object>> getAllUsers();
+    public Map<String, Object> getUserById(String userId);
 }

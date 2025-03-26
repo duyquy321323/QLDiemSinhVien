@@ -130,11 +130,7 @@ const DangKiMonHoc = () => {
   
     // Chuyển từ object về array
     let payload = Object.values(formattedData);
-    payload = payload.filter(item => item.ngayBatDau);
-    if (payload.length === 0) {
-      window.alert("Không có môn học hợp lệ để gửi!");
-      return;
-    }
+    console.log(payload);
   
     try{
       await api().post(`/giaovu/dangkymonhoc/${id}`, payload);

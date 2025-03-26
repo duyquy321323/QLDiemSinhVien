@@ -4,6 +4,7 @@
  */
 package com.quanlydiemsinhvien.qldsv.service;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 
@@ -36,7 +37,7 @@ public interface MonHocService {
     List<Monhoc> getMonHocByIdSinhVien(String idSinhvien);
     List<Monhoc> getMonHocByIdSinhVienDangHoc(String idSinhvien);
     
-    List<MonhocHocky> getMonHocHocKy(Map<String, String> params);
+    List<MonhocHocky> getMonHocHocKy(Map<String, String> params, Principal principal);
      List<Monhocdangky> getMonHocSinhVienDangKy(Map<String, String> params);
      
      boolean thanhToanHocPhi(Map<String, String> params);

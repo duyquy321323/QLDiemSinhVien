@@ -103,6 +103,29 @@ public class KeycloakUserServiceImpl implements KeycloakUserService {
     }
 
     @Override
+public Map<String, Object> getUserById(String userId) {
+    try {
+        String url = String.format("%s/admin/realms/%s/users/%s", serverUrl, realm, userId);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setBearerAuth(getAdminAccessToken());
+
+        HttpEntity<Void> request = new HttpEntity<>(headers);
+        ResponseEntity<String> response = new RestTemplate().exchange(url, HttpMethod.GET, request, String.class);
+
+        if (response.getStatusCode() == HttpStatus.OK) {
+            ObjectMapper objectMapper = new ObjectMapper();
+            return objectMapper.readValue(response.getBody(), new TypeReference<Map<String, Object>>() {});
+        }
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+    return null; // Trả về null nếu có lỗi
+}
+
+
+    @Override
     public boolean checkOldPassword(String username, String oldPassword) {
     try {
         String url = String.format("%s/realms/%s/protocol/openid-connect/token", serverUrl, realm);
@@ -449,4 +472,32 @@ public String getUserIdByUsername(String username) {
     }
     return null; // Trả về null nếu không tìm thấy
 }
+
+public List<Map<String, Object>> getAllUsers() {
+    try {
+        String accessToken = getAdminAccessToken();
+        if (accessToken == null) {
+            throw new RuntimeException("Không thể lấy access token");
+        }
+
+        String url = String.format("%s/admin/realms/%s/users", serverUrl, realm);
+        
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setBearerAuth(accessToken);
+
+        HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
+        ResponseEntity<String> response = new RestTemplate().exchange(url, HttpMethod.GET, requestEntity, String.class);
+
+        if (response.getStatusCode() == HttpStatus.OK) {
+            ObjectMapper objectMapper = new ObjectMapper();
+            return objectMapper.readValue(response.getBody(), new TypeReference<List<Map<String, Object>>>() {});
+        }
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+    return Collections.emptyList();
+}
+
+
 }

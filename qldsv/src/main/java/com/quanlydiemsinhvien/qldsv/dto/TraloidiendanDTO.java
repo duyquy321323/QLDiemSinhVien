@@ -15,5 +15,5 @@ public class TraloidiendanDTO {
     private Integer idTraLoiDienDan;
     private String noiDungTraLoi;
     private CauhoidiendangDTO idCauHoiDienDan;
-    private TaiKhoanDTO idTaiKhoan;
+    private String idTaiKhoan;
 }

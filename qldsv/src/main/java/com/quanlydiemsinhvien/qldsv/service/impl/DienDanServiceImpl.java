@@ -4,6 +4,7 @@
  */
 package com.quanlydiemsinhvien.qldsv.service.impl;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -17,10 +18,8 @@ import com.quanlydiemsinhvien.qldsv.converter.TraloidiendanConverter;
 import com.quanlydiemsinhvien.qldsv.dto.CauhoidiendangDTO;
 import com.quanlydiemsinhvien.qldsv.dto.TraloidiendanDTO;
 import com.quanlydiemsinhvien.qldsv.pojo.Cauhoidiendang;
-import com.quanlydiemsinhvien.qldsv.pojo.Taikhoan;
 import com.quanlydiemsinhvien.qldsv.pojo.Traloidiendan;
 import com.quanlydiemsinhvien.qldsv.repository.CauhoidiendangRepository;
-import com.quanlydiemsinhvien.qldsv.repository.TaiKhoanRepository;
 import com.quanlydiemsinhvien.qldsv.repository.TraloidiendanRepository;
 import com.quanlydiemsinhvien.qldsv.request.CauhoidiendangRequest;
 import com.quanlydiemsinhvien.qldsv.request.TraloidiendanRequest;
@@ -44,29 +43,23 @@ public class DienDanServiceImpl implements DienDanService {
     private TraloidiendanConverter traloidiendanConverter;
 
     @Autowired
-    private TaiKhoanRepository taiKhoanRepository;
-
-    @Autowired
     private KeycloakUserService keycloakUserService;
 
     @Override
-    public Object getCauHoi(Map<String, String> params) {
+    public Object getCauHoi(Map<String, String> params, Principal principal) {
         String cateId = params.get("cauhoiId");
             Cauhoidiendang cauhoidiendang = cauhoidiendangRepository.findById(Integer.parseInt(cateId))
             .orElseThrow(() -> new RuntimeException("Câu hỏi diễn đàng không tồn tại!"));
-        Taikhoan taikhoan = cauhoidiendang.getIdTaiKhoan();
-        return new Object[] { cauhoidiendang.getNoiDungCauHoi(), cauhoidiendang.getNgayTao(), keycloakUserService.getUsernameByUserId(taikhoan.getIdTaiKhoan()),
-                taikhoan.getImage() };
+        return new Object[] { cauhoidiendang.getNoiDungCauHoi(), cauhoidiendang.getNgayTao(), keycloakUserService.getUsernameByUserId(principal.getName()) };
     }
 
     @Override
-    public boolean addOrUpdateTraloi(TraloidiendanRequest p) {
+    public boolean addOrUpdateTraloi(TraloidiendanRequest p, Principal principal) {
         if (p.getNoiDungTraLoi() == null) {
             return false;
         } else {
             Cauhoidiendang cauhoidiendang = cauhoidiendangRepository.findById(p.getIdCauHoiDienDan()).orElse(null);
-            Taikhoan taikhoan = taiKhoanRepository.findById(p.getIdTaiKhoan()).orElse(null);
-            Traloidiendan traloidiendan = Traloidiendan.builder().idCauHoiDienDan(cauhoidiendang).idTaiKhoan(taikhoan)
+            Traloidiendan traloidiendan = Traloidiendan.builder().idCauHoiDienDan(cauhoidiendang).idTaiKhoan(principal.getName())
                     .noiDungTraLoi(p.getNoiDungTraLoi()).build();
             traloidiendanRepository.save(traloidiendan);
         }
@@ -77,6 +70,7 @@ public class DienDanServiceImpl implements DienDanService {
     public List<CauhoidiendangDTO> getCauHoiDienDan() {
         return cauhoidiendangRepository.findAll().stream()
                 .map(it -> cauhoidiendangConverter.cauhoidiendangToCauhoidiendangDTO(it)).collect(Collectors.toList());
+        
     }
 
     @Override
@@ -101,13 +95,12 @@ public class DienDanServiceImpl implements DienDanService {
     }
 
     @Override
-    public boolean addOrUpdateCauHoi(CauhoidiendangRequest p) {
+    public boolean addOrUpdateCauHoi(CauhoidiendangRequest p, Principal principal) {
         try {
             if (p.getNoiDungCauHoi() == null) {
                 return false;
             } else {
                 Cauhoidiendang cauhoidiendang;
-                Taikhoan taikhoan = taiKhoanRepository.findById(p.getIdTaiKhoan()).orElse(null);
                 if(p.getIdCauHoiDienDan() != null){
                     cauhoidiendang = cauhoidiendangRepository.findById(p.getIdCauHoiDienDan()).orElse(null);
                     if(cauhoidiendang != null){
@@ -116,7 +109,7 @@ public class DienDanServiceImpl implements DienDanService {
                         return true;
                     } 
                 }else {
-                    cauhoidiendang = Cauhoidiendang.builder().idTaiKhoan(taikhoan)
+                    cauhoidiendang = Cauhoidiendang.builder().idTaiKhoan(principal.getName())
                     .noiDungCauHoi(p.getNoiDungCauHoi()).idCauHoiDienDan(p.getIdCauHoiDienDan())
                     .ngayTao(p.getNgayTao()).build();
                     cauhoidiendangRepository.save(cauhoidiendang);

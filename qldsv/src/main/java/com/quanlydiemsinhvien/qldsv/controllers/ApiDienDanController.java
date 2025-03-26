@@ -4,6 +4,7 @@
  */
 package com.quanlydiemsinhvien.qldsv.controllers;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 
@@ -50,21 +51,21 @@ public class ApiDienDanController {
 
     @RequestMapping("/cauhoiid/")
     @CrossOrigin
-    public ResponseEntity<Object> cauhoi(@RequestParam Map<String, String> params) {
-        return new ResponseEntity<>(this.diendanservice.getCauHoi(params), HttpStatus.OK);
+    public ResponseEntity<Object> cauhoi(@RequestParam Map<String, String> params, Principal principal) {
+        return new ResponseEntity<>(this.diendanservice.getCauHoi(params, principal), HttpStatus.OK);
     }
 
     @PostMapping("/add-cauhoi/")
     @CrossOrigin
-    public ResponseEntity<String> addCauHoi(@RequestBody CauhoidiendangRequest cauhoi) {
-        this.diendanservice.addOrUpdateCauHoi(cauhoi);
+    public ResponseEntity<String> addCauHoi(@RequestBody CauhoidiendangRequest cauhoi, Principal principal) {
+        this.diendanservice.addOrUpdateCauHoi(cauhoi, principal);
         return new ResponseEntity<>(cauhoi.getNoiDungCauHoi(), HttpStatus.OK);
     }
 
     @PostMapping("/add-traloi/")
     @CrossOrigin
-    public ResponseEntity<String> addTraLoi(@RequestBody TraloidiendanRequest traloi) {
-        this.diendanservice.addOrUpdateTraloi(traloi);
+    public ResponseEntity<String> addTraLoi(@RequestBody TraloidiendanRequest traloi, Principal principal) {
+        this.diendanservice.addOrUpdateTraloi(traloi, principal);
         return new ResponseEntity<>(traloi.getNoiDungTraLoi(), HttpStatus.OK);
     }
     

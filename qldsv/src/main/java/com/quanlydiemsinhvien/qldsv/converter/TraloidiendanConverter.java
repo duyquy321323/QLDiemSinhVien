@@ -14,15 +14,11 @@ public class TraloidiendanConverter {
     private ModelMapper modelMapper;
 
     @Autowired
-    private TaiKhoanConverter taiKhoanConverter;
-
-    @Autowired
     private CauhoidiendangConverter cauhoidiendangConverter;
 
     public TraloidiendanDTO traloidiendanToTraloidiendanDTO(Traloidiendan traloidiendan){
         TraloidiendanDTO traloidiendanDTO = modelMapper.map(traloidiendan, TraloidiendanDTO.class);
         traloidiendanDTO.setIdCauHoiDienDan(cauhoidiendangConverter.cauhoidiendangToCauhoidiendangDTO(traloidiendan.getIdCauHoiDienDan()));
-        traloidiendanDTO.setIdTaiKhoan(taiKhoanConverter.taiKhoanToTaiKhoanDTO(traloidiendan.getIdTaiKhoan()));
         return traloidiendanDTO;
     }
 }
