@@ -28,9 +28,9 @@ const SideBar = () => {
         <Link to="/home" class="menu-item">
           <i class="fa-solid fa-house icon-padding"></i>Tổng Quan
         </Link>
-        <Link class="menu-item" to="/diendan">
+        {/* <Link class="menu-item" to="/diendan">
           <i class="fa-solid fa-message icon-padding"></i>Diễn Đàn
-        </Link>
+        </Link> */}
         {giangvien != null? 
         <>
             <Link class="menu-item" to="/danhsachmonchuanbi">

@@ -60,8 +60,8 @@ const XemDiem = () => {
                         </thead>
                         <tbody>
                             <tr>
-                            <td>{!Diem? parseFloat(Diem).toFixed(2) : "_"}</td>
-                                <td>{!DiemHe4? parseFloat(DiemHe4).toFixed(2) : "_"}</td>
+                            <td>{!isNaN(Diem)? parseFloat(Diem).toFixed(2) : "_"}</td>
+                                <td>{!isNaN(!DiemHe4)? parseFloat(DiemHe4).toFixed(2) : "_"}</td>
                                 <td>
                                     {(() => {
                                         switch (true) {

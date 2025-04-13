@@ -1,11 +1,11 @@
-package com.quanlydiemsinhvien.qldsv.request;
+// package com.quanlydiemsinhvien.qldsv.request;
 
-import lombok.Getter;
+// import lombok.Getter;
 
-@Getter
-public class CauhoidiendangRequest {
-    private String idTaiKhoan;
-    private String ngayTao;
-    private String noiDungCauHoi;
-    private Integer idCauHoiDienDan;
-}
+// @Getter
+// public class CauhoidiendangRequest {
+//     private String idTaiKhoan;
+//     private String ngayTao;
+//     private String noiDungCauHoi;
+//     private Integer idCauHoiDienDan;
+// }

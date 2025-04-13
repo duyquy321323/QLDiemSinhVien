@@ -54,7 +54,7 @@ public class Monhocdangky implements Serializable {
     @OneToMany(mappedBy = "idMonHoc", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Diem> diemSet;
 
-    @JoinColumn(nullable = false)
+    @JoinColumn
     @ManyToOne
     private MonhocHocky idMonHoc;
 

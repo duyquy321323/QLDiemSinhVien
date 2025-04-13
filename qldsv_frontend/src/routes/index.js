@@ -13,7 +13,6 @@ import DanhSachMonDaKhoa from "../page/DanhSachMonHocDaKhoa";
 import DanhSachSinhVien from "../page/DanhSachSinhVien";
 import DanhSachSinhVienLop from "../page/DanhSachSinhVienLop";
 import DanhSachTaiKhoanAdmin from "../page/DanhSachTaiKhoanAdmin";
-import DienDan from "../page/DienDan";
 import GiangVienAdmin from "../page/GiangVienAdmin";
 import HeDaoTaoAdmin from "../page/HeDaoTaoAdmin";
 import HocKyAdmin from "../page/HocKyAdmin";
@@ -32,7 +31,6 @@ import SignUp from "../page/SignUp";
 import SinhVienAdmin from "../page/SinhVienAdmin";
 import ThayDoiMatKhau from "../page/ThayDoiMatKhau";
 import ThayDoiMatKhauAdmin from "../page/ThayDoiMatKhauAdmin";
-import Themchude from "../page/ThemChuDe";
 import ThemSuaGiangVien from "../page/ThemSuaGiangVien";
 import ThemSuaHeDaoTao from "../page/ThemSuaHeDaoTao";
 import ThemSuaHocKy from "../page/ThemSuaHocKy";
@@ -45,7 +43,6 @@ import ThemSuaSinhVien from "../page/ThemSuaSinhVien";
 import Thongtintaikhoan from "../page/ThongTinTaiKhoan";
 import ThongTinTaiKhoanAdmin from "../page/ThongTinTaiKhoanAdmin";
 import TimSinhVien from "../page/TimSinhVien";
-import TraLoiDienDan from "../page/TraLoiDienDan";
 import XemDiem from "../page/XemDiem";
 
 const Routes = () => {
@@ -76,26 +73,26 @@ const Routes = () => {
                     path: '/xemdiem',
                     element: <XemDiem/>
                 },
-                {
-                    path: '/diendan',
-                    element: <DienDan/>
-                },
+                // {
+                //     path: '/diendan',
+                //     element: <DienDan/>
+                // },
                 {
                     path: '/thaydoimatkhau',
                     element: <ThayDoiMatKhau/> 
                 },
-                {
-                    path: '/themcauhoi',
-                    element: <Themchude/>
-                },
+                // {
+                //     path: '/themcauhoi',
+                //     element: <Themchude/>
+                // },
                 {
                     path: '/thongtin',
                     element: <Thongtintaikhoan/>
                 },
-                {
-                    path: '/traloidiendan',
-                    element: <TraLoiDienDan/>
-                },
+                // {
+                //     path: '/traloidiendan',
+                //     element: <TraLoiDienDan/>
+                // },
                 {
                     path: '/danhsachmonchuanbi',
                     element: <DanhSachMonChuaDay/>

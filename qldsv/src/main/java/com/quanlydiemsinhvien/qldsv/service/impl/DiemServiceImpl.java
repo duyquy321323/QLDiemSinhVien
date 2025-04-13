@@ -593,8 +593,8 @@ public class DiemServiceImpl implements DiemService {
         }
         if (monHocDK != null) {
             monhocHocky.setSoLuongConLai(monhocHocky.getSoLuongConLai() + 1);
-            monhocHocky.getMonhocdangkySet().remove(monHocDK);
             monHocHockyRepository.save(monhocHocky);
+            monHocDangKyRepository.delete(monHocDK);
             return true;
         }
         return false;
