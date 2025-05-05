@@ -23,20 +23,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.quanlydiemsinhvien.qldsv.converter.MonHocConverter;
-import com.quanlydiemsinhvien.qldsv.converter.MonHocDangKyConverter;
 import com.quanlydiemsinhvien.qldsv.converter.MonHocHocKyConverter;
 import com.quanlydiemsinhvien.qldsv.dto.MonhocDTO;
 import com.quanlydiemsinhvien.qldsv.dto.MonhocHockyDTO;
-import com.quanlydiemsinhvien.qldsv.pojo.Giangvien;
 import com.quanlydiemsinhvien.qldsv.pojo.Monhoc;
 import com.quanlydiemsinhvien.qldsv.pojo.MonhocHocky;
 import com.quanlydiemsinhvien.qldsv.pojo.Monhocdangky;
-import com.quanlydiemsinhvien.qldsv.pojo.Sinhvien;
-import com.quanlydiemsinhvien.qldsv.repository.GiangvienRepository;
 import com.quanlydiemsinhvien.qldsv.repository.MonHocRepository;
 import com.quanlydiemsinhvien.qldsv.repository.MonhocHockyRepository;
 import com.quanlydiemsinhvien.qldsv.repository.MonhocdangkyRepository;
-import com.quanlydiemsinhvien.qldsv.repository.SinhVienRepository;
+import com.quanlydiemsinhvien.qldsv.service.KeycloakUserService;
 import com.quanlydiemsinhvien.qldsv.service.MonHocService;
 
 /**
@@ -45,17 +41,13 @@ import com.quanlydiemsinhvien.qldsv.service.MonHocService;
  */
 @Service
 @Transactional
-public class MonHocServiceImpl  implements MonHocService{
-    
+public class MonHocServiceImpl implements MonHocService {
+
     @Autowired
     private MonHocRepository monHocRepository;
 
     @Autowired
     private MonhocHockyRepository monhocHocKyRepository;
-    @Autowired
-    private GiangvienRepository giangvienRepository;
-    @Autowired
-    private SinhVienRepository sinhVienRepository;
     @Autowired
     private MonhocdangkyRepository monhocdangkyRepository;
 
@@ -66,14 +58,14 @@ public class MonHocServiceImpl  implements MonHocService{
     private MonHocHocKyConverter monHocHocKyConverter;
 
     @Autowired
-    private MonHocDangKyConverter monHocDangKyConverter;
+    private KeycloakUserService keycloakUserService;
 
     @Override
     public Page<MonhocDTO> getMonHocList(Map<String, String> params, int page, int pageSize) {
         try {
             String ten = params.get("tenMH");
             Pageable pageable = PageRequest.of(page - 1, pageSize);
-            if(ten != null){
+            if (ten != null) {
                 Page<Monhoc> monHocList = monHocRepository.findByTenMonHocContaining(ten, pageable);
                 return monHocList.map(it -> it != null ? monHocConverter.monhocToMonhocDTO(it) : null);
             }
@@ -87,10 +79,10 @@ public class MonHocServiceImpl  implements MonHocService{
 
     @Override
     public boolean addOrUpdateMonHoc(Monhoc mh) {
-        try{
+        try {
             monHocRepository.save(mh);
             return true;
-        } catch(Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return false;
         }
@@ -98,8 +90,9 @@ public class MonHocServiceImpl  implements MonHocService{
 
     @Override
     public MonhocDTO getMonHocById(int id) {
-        try{
-            return monHocConverter.monhocToMonhocDTO(monHocRepository.findById(id).orElseThrow(() -> new RuntimeException("Môn học không tồn tại!")));
+        try {
+            return monHocConverter.monhocToMonhocDTO(
+                    monHocRepository.findById(id).orElseThrow(() -> new RuntimeException("Môn học không tồn tại!")));
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -108,9 +101,9 @@ public class MonHocServiceImpl  implements MonHocService{
 
     @Override
     public boolean deleteMonHoc(int id) {
-        try{
+        try {
             monHocRepository.deleteById(id);
-        } catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return false;
         }
@@ -119,24 +112,27 @@ public class MonHocServiceImpl  implements MonHocService{
 
     @Override
     public Monhoc getMonhocByIdMonhocHocKy(Integer idMonHocHocKy) {
-        MonhocHocky monhocHocky = monhocHocKyRepository.findById(idMonHocHocKy).orElseThrow(() -> new RuntimeException("Môn học học kỳ không tồn tại!"));
+        MonhocHocky monhocHocky = monhocHocKyRepository.findById(idMonHocHocKy)
+                .orElseThrow(() -> new RuntimeException("Môn học học kỳ không tồn tại!"));
         return monhocHocky.getIdMonHoc();
     }
 
     @Override
     public List<MonhocHockyDTO> getMonHocByGiangVien(Map<String, String> params) {
         String idTaiKhoan = params.get("taiKhoanId");
-        Giangvien giangvien = giangvienRepository.findByIdTaiKhoan(idTaiKhoan).orElseThrow(() -> new RuntimeException("Tài khoản không phải là giáo viên!"));
         Date currentDate = Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant());
-        return monhocHocKyRepository.findByIdGiangVienAndIdHocky_NgayBatDauLessThanEqualAndIdHocky_NgayKetThucGreaterThanEqual(giangvien, currentDate, currentDate)
+        return monhocHocKyRepository
+                .findByIdGiangVienAndIdHocky_NgayBatDauLessThanEqualAndIdHocky_NgayKetThucGreaterThanEqual(idTaiKhoan,
+                        currentDate, currentDate)
                 .stream().map(it -> monHocHocKyConverter.monhocHockyToMonhocHockyDTO(it)).collect(Collectors.toList());
     }
 
     @Override
     public List<Monhoc> getMonHocByIdSinhVien(String idSinhvien) {
-        List<Monhocdangky> monhocdangkyList = monhocdangkyRepository.findByIdSinhVien_IdSinhVienAndTrangThaiAndKhoaMon(idSinhvien, (short)1, (short)1);
+        List<Monhocdangky> monhocdangkyList = monhocdangkyRepository
+                .findByIdSinhVienAndTrangThaiAndKhoaMon(idSinhvien, (short) 1, (short) 1);
         Set<Monhoc> monhocHockyList = new HashSet<>();
-        for(Monhocdangky monhocdangky : monhocdangkyList){
+        for (Monhocdangky monhocdangky : monhocdangkyList) {
             monhocHockyList.add(monhocdangky.getIdMonHoc().getIdMonHoc());
         }
         return new ArrayList<>(monhocHockyList);
@@ -144,9 +140,10 @@ public class MonHocServiceImpl  implements MonHocService{
 
     @Override
     public List<Monhoc> getMonHocByIdSinhVienDangHoc(String idSinhvien) {
-        List<Monhocdangky> monhocdangkyList = monhocdangkyRepository.findByIdSinhVien_IdSinhVienAndTrangThaiAndKhoaMon(idSinhvien, (short)1, (short)0);
+        List<Monhocdangky> monhocdangkyList = monhocdangkyRepository
+                .findByIdSinhVienAndTrangThaiAndKhoaMon(idSinhvien, (short) 1, (short) 0);
         Set<Monhoc> monhocHockyList = new HashSet<>();
-        for(Monhocdangky monhocdangky : monhocdangkyList){
+        for (Monhocdangky monhocdangky : monhocdangkyList) {
             monhocHockyList.add(monhocdangky.getIdMonHoc().getIdMonHoc());
         }
         return new ArrayList<>(monhocHockyList);
@@ -156,39 +153,45 @@ public class MonHocServiceImpl  implements MonHocService{
     public List<MonhocHocky> getMonHocHocKy(Map<String, String> params, Principal principal) {
         String tenMonHoc = params.get("tenMonHoc");
         String idTaiKhoan = principal.getName();
-        Sinhvien sinhvien = sinhVienRepository.findByIdTaiKhoan(idTaiKhoan).orElseThrow(() -> new RuntimeException("Tài khoản này không phải là sinh viên!"));
-        String idLopHoc = sinhvien.getMaLop().getIdLopHoc().toString();
+        Map<String, Object> sinhvien = keycloakUserService.getUserById(idTaiKhoan);
+        Map<String, Object> attributes = (Map<String, Object>) sinhvien.get("attributes");
+        String idLopHoc = (String) ((ArrayList) attributes.get("id_lop_hoc")).get(0);
         Date currentDate = Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant());
-        if(tenMonHoc != null){
-            return monhocHocKyRepository.findByIdHocky_IdLop_IdLopHocAndIdMonHoc_TenMonHocAndIdHocky_NgayDangKyLessThanEqualAndIdHocky_NgayHetHanGreaterThanEqual(Integer.parseInt(idLopHoc), tenMonHoc, currentDate, currentDate);
+        if (tenMonHoc != null) {
+            return monhocHocKyRepository
+                    .findByIdHocky_IdLop_IdLopHocAndIdMonHoc_TenMonHocAndIdHocky_NgayDangKyLessThanEqualAndIdHocky_NgayHetHanGreaterThanEqual(
+                            Integer.parseInt(idLopHoc), tenMonHoc, currentDate, currentDate);
         } else {
-            return monhocHocKyRepository.findByIdHocky_IdLop_IdLopHocAndIdHocky_NgayDangKyLessThanEqualAndIdHocky_NgayHetHanGreaterThanEqual(Integer.parseInt(idLopHoc), currentDate, currentDate);
+            return monhocHocKyRepository
+                    .findByIdHocky_IdLop_IdLopHocAndIdHocky_NgayDangKyLessThanEqualAndIdHocky_NgayHetHanGreaterThanEqual(
+                            Integer.parseInt(idLopHoc), currentDate, currentDate);
         }
     }
 
     @Override
     public List<Monhocdangky> getMonHocSinhVienDangKy(Map<String, String> params) {
         String idSinhVien = params.get("idSinhVien");
-        Sinhvien sinhvien = sinhVienRepository.findById(Integer.valueOf(idSinhVien)).orElseThrow(() -> new RuntimeException("Sinh viên không tồn tại!"));
         List<MonhocHocky> monhocHockyList = monhocHocKyRepository.findAll();
         Date currentDate = Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant());
-        return monhocdangkyRepository.findByIdMonHocInAndIdSinhVienAndIdMonHoc_IdHocky_NgayDangKyLessThanEqualAndIdMonHoc_IdHocky_NgayHetHanGreaterThanEqual(monhocHockyList, sinhvien, currentDate, currentDate);
+        return monhocdangkyRepository
+                .findByIdMonHocInAndIdSinhVienAndIdMonHoc_IdHocky_NgayDangKyLessThanEqualAndIdMonHoc_IdHocky_NgayHetHanGreaterThanEqual(
+                        monhocHockyList, idSinhVien, currentDate, currentDate);
     }
 
     @Override
     public List<MonhocHockyDTO> getMonHocByGiangVienChuaDay(Map<String, String> params) {
         String idTaiKhoan = params.get("taiKhoanId");
-        Giangvien giangvien = giangvienRepository.findByIdTaiKhoan(idTaiKhoan).orElseThrow(() -> new RuntimeException("Tài khoản không phải là giáo viên!"));
         Date currentDate = Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant());
-        return monhocHocKyRepository.findByIdGiangVienAndIdHocky_NgayBatDauGreaterThan(giangvien, currentDate).stream().map(it -> monHocHocKyConverter.monhocHockyToMonhocHockyDTO(it)).collect(Collectors.toList());
+        return monhocHocKyRepository.findByIdGiangVienAndIdHocky_NgayBatDauGreaterThan(idTaiKhoan, currentDate).stream()
+                .map(it -> monHocHocKyConverter.monhocHockyToMonhocHockyDTO(it)).collect(Collectors.toList());
     }
 
     @Override
     public List<MonhocHockyDTO> getMonHocByGiangVienDaDay(Map<String, String> params) {
         String idTaiKhoan = params.get("taiKhoanId");
-        Giangvien giangvien = giangvienRepository.findByIdTaiKhoan(idTaiKhoan).orElseThrow(() -> new RuntimeException("Tài khoản không phải là giáo viên!"));
         Date currentDate = Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant());
-        return monhocHocKyRepository.findByIdGiangVienAndIdHocky_NgayKetThucLessThan(giangvien, currentDate).stream().map(it -> monHocHocKyConverter.monhocHockyToMonhocHockyDTO(it)).collect(Collectors.toList());
+        return monhocHocKyRepository.findByIdGiangVienAndIdHocky_NgayKetThucLessThan(idTaiKhoan, currentDate).stream()
+                .map(it -> monHocHocKyConverter.monhocHockyToMonhocHockyDTO(it)).collect(Collectors.toList());
     }
 
     @Override
@@ -204,7 +207,7 @@ public class MonHocServiceImpl  implements MonHocService{
         }
         return false;
     }
-   
+
     @Override
     public Long countMonHoc() {
         return this.monHocRepository.count();
@@ -213,11 +216,12 @@ public class MonHocServiceImpl  implements MonHocService{
     @Override
     public List<MonhocHockyDTO> getMonhocByHocKy(Integer idHocKy) {
         try {
-            return monhocHocKyRepository.findByIdHocky_IdHocKy(idHocKy).stream().map(it -> monHocHocKyConverter.monhocHockyToMonhocHockyDTO(it)).collect(Collectors.toList());
+            return monhocHocKyRepository.findByIdHocky_IdHocKy(idHocKy).stream()
+                    .map(it -> monHocHocKyConverter.monhocHockyToMonhocHockyDTO(it)).collect(Collectors.toList());
         } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
     }
-    
+
 }

@@ -1,17 +1,16 @@
 package com.quanlydiemsinhvien.qldsv.dto;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 
-@Builder
+@SuperBuilder
 @Getter
-@NoArgsConstructor
 @AllArgsConstructor
 @Setter
+@NoArgsConstructor
 public class GiangVienDTO extends UserDTO {
-    
-    private Integer idGiangVien;
+    private String idGiangVien;
 }

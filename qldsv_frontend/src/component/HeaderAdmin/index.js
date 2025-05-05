@@ -96,10 +96,10 @@ const HeaderAdmin = () => {
       path: "/giaovu/danhsachtaikhoan",
       name: "Danh sách tài khoản",
     },
-    {
-      path: "/giaovu/captaikhoan",
-      name: "Cấp tài khoản",
-    },
+    // {
+    //   path: "/giaovu/captaikhoan",
+    //   name: "Cấp tài khoản",
+    // },
     {
       path: "/giaovu/thongtintaikhoan",
       name: "Thông tin tài khoản",

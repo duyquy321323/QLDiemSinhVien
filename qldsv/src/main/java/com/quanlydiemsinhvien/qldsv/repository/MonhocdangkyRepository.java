@@ -8,18 +8,19 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.quanlydiemsinhvien.qldsv.pojo.MonhocHocky;
 import com.quanlydiemsinhvien.qldsv.pojo.Monhocdangky;
-import com.quanlydiemsinhvien.qldsv.pojo.Sinhvien;
 
 public interface MonhocdangkyRepository extends JpaRepository<Monhocdangky, Integer> {
-    List<Monhocdangky> findByIdSinhVien(Sinhvien IdSinhVien);
+    List<Monhocdangky> findByIdSinhVien(String IdSinhVien);
 
-    Optional<Monhocdangky> findByIdSinhVienAndIdMonHoc(Sinhvien IdSinhVien, MonhocHocky idMonHoc);
+    Optional<Monhocdangky> findByIdSinhVienAndIdMonHoc(String IdSinhVien, MonhocHocky idMonHoc);
 
-    List<Monhocdangky> findByIdMonHocInAndIdSinhVien(List<MonhocHocky> idMonHoc,Sinhvien IdSinhVien);
+    List<Monhocdangky> findByIdMonHocInAndIdSinhVien(List<MonhocHocky> idMonHoc, String IdSinhVien);
 
     List<Monhocdangky> findByIdMonHoc(MonhocHocky idMonHoc);
 
-    List<Monhocdangky> findByIdSinhVien_IdSinhVienAndTrangThaiAndKhoaMon(String IdSinhVien, Short trangThai, Short khoaMon);
+    List<Monhocdangky> findByIdSinhVienAndTrangThaiAndKhoaMon(String IdSinhVien, Short trangThai,
+            Short khoaMon);
 
-    List<Monhocdangky> findByIdMonHocInAndIdSinhVienAndIdMonHoc_IdHocky_NgayDangKyLessThanEqualAndIdMonHoc_IdHocky_NgayHetHanGreaterThanEqual(List<MonhocHocky> idMonHoc, Sinhvien IdSinhVien, Date currentDate, Date currentDate2);
+    List<Monhocdangky> findByIdMonHocInAndIdSinhVienAndIdMonHoc_IdHocky_NgayDangKyLessThanEqualAndIdMonHoc_IdHocky_NgayHetHanGreaterThanEqual(
+            List<MonhocHocky> idMonHoc, String IdSinhVien, Date currentDate, Date currentDate2);
 }

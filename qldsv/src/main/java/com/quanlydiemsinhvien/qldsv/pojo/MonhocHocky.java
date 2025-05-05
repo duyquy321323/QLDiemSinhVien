@@ -55,9 +55,7 @@ public class MonhocHocky implements Serializable {
 
     private Date ngayKetThuc;
 
-    @JoinColumn(nullable = false)
-    @ManyToOne
-    private Giangvien idGiangVien;
+    private String idGiangVien;
 
     @JoinColumn(nullable = false)
     @ManyToOne
@@ -71,7 +69,7 @@ public class MonhocHocky implements Serializable {
     @ManyToOne
     private Phonghoc phongHoc;
 
-    @OneToMany(mappedBy = "idMonHoc", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE})
+    @OneToMany(mappedBy = "idMonHoc", cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE })
     private Set<Monhocdangky> monhocdangkySet;
 
     @Transient
@@ -82,8 +80,6 @@ public class MonhocHocky implements Serializable {
     private Date[] listDateKetThuc;
     @Transient
     private Integer[] listSoLuong;
-    @Transient
-    private Giangvien[] listGiangviens;
     @Transient
     private Phonghoc[] listPhonghocs;
 
@@ -101,7 +97,8 @@ public class MonhocHocky implements Serializable {
             return false;
         }
         MonhocHocky other = (MonhocHocky) object;
-        if ((this.idMonHocHocKy == null && other.idMonHocHocKy != null) || (this.idMonHocHocKy != null && !this.idMonHocHocKy.equals(other.idMonHocHocKy))) {
+        if ((this.idMonHocHocKy == null && other.idMonHocHocKy != null)
+                || (this.idMonHocHocKy != null && !this.idMonHocHocKy.equals(other.idMonHocHocKy))) {
             return false;
         }
         return true;

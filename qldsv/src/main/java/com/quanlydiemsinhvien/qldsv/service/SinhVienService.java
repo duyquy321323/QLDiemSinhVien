@@ -7,10 +7,9 @@ package com.quanlydiemsinhvien.qldsv.service;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.data.domain.Page;
-
 import com.quanlydiemsinhvien.qldsv.dto.SinhVienDTO;
 import com.quanlydiemsinhvien.qldsv.pojo.DiemMonHoc;
+import com.quanlydiemsinhvien.qldsv.request.SinhVienCreateRequest;
 
 /**
  *
@@ -18,12 +17,20 @@ import com.quanlydiemsinhvien.qldsv.pojo.DiemMonHoc;
  */
 public interface SinhVienService {
     SinhVienDTO getSinhvien(String idTaiKhoan);
-    Page<SinhVienDTO> getSinhvienList(Map<String, String> params, int page, int pageSize);
-    boolean addOrUpdateSinhVien(SinhVienDTO sv );
-    SinhVienDTO getSinhVienById(Integer idSinhVien);
-    boolean deleteById(Integer id);
+
+    List<SinhVienDTO> getSinhvienList(Map<String, String> params);
+
+    boolean addOrUpdateSinhVien(SinhVienCreateRequest sv);
+
+    SinhVienDTO getSinhVienById(String idSinhVien);
+
+    boolean deleteById(String id);
+
     List<DiemMonHoc> getSinhvienByMonHoc(Map<String, String> params);
+
     Long countSinhVien();
+
     List<SinhVienDTO> getSinhVienByIdLop(int idLop);
-    Object getSinhVienByIdAPI(Integer idSinhVien);
+
+    Object getSinhVienByIdAPI(String idSinhVien);
 }

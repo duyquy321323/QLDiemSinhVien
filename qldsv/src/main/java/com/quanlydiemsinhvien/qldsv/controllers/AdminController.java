@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.quanlydiemsinhvien.qldsv.dto.GiaoVuDTO;
-import com.quanlydiemsinhvien.qldsv.request.TaiKhoanGiangVienRequest;
 import com.quanlydiemsinhvien.qldsv.service.GiaoVuService;
 import com.quanlydiemsinhvien.qldsv.service.TaiKhoanService;
 
@@ -41,32 +40,9 @@ public class AdminController {
         return ResponseEntity.ok(giaoVuService.getGiaoVu(auth));
     }
 
-    @RequestMapping("/giaovu")
-    public String admin() {
-        return "admin";
-    }
-
-    @GetMapping("/giaovu/thongtin")
-    public String thongtin(Model model) {
-        return "thongtintaikhoan";
-    }
-
     @GetMapping("giaovu/taikhoan")
     public List<Map<String, Object>> taikhoan(@RequestParam Map<String, String> params) {
         return taiKhoanService.getTaiKhoans(params);
-    }
-
-    @PostMapping("/giaovu/taikhoan/dangki")
-    public ResponseEntity<?> add(@RequestBody TaiKhoanGiangVienRequest t) {
-            if (t.getMatKhau().equals(t.getXacNhanMk())) {
-                if (taiKhoanService.addAcountGV(t) == true) {
-                    return ResponseEntity.ok().build();
-                } else {
-                    return ResponseEntity.internalServerError().build();
-                }
-            } else {
-                return ResponseEntity.ok().build();
-            }
     }
 
 }

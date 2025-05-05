@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -32,30 +31,26 @@ public class SinhVienController {
     @Autowired
     private SinhVienService svService;
 
-    @Autowired
-    private SinhVienConverter sinhVienConverter;
-
     @GetMapping("/giaovu/sinhvien")
-    public Page<SinhVienDTO> list(@RequestParam Map<String, String> params, @RequestParam(defaultValue="1" ,required = false) Integer page,
-    @RequestParam(defaultValue = "100", required=false) int pageSize) {
-        return svService.getSinhvienList(params, page, pageSize);
+    public List<SinhVienDTO> list(@RequestParam Map<String, String> params) {
+        return svService.getSinhvienList(params);
     }
 
     @PostMapping("/giaovu/sinhvien/add")
     public ResponseEntity<?> add(@RequestBody SinhVienCreateRequest sv) {
-            if (this.svService.addOrUpdateSinhVien(sinhVienConverter.sinhVienRequestToSinhVienDTO(sv))) {
-                return ResponseEntity.ok().build();
-            }
-            return ResponseEntity.badRequest().build();
+        if (this.svService.addOrUpdateSinhVien(sv)) {
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.badRequest().build();
     }
 
     @GetMapping("/giaovu/sinhvien/{id}")
-    public SinhVienDTO chiTietSinhVien(@PathVariable(value = "id") Integer id) {
+    public SinhVienDTO chiTietSinhVien(@PathVariable(value = "id") String id) {
         return svService.getSinhVienById(id);
     }
 
     @GetMapping("/giaovu/sinhvien/lophoc/{id}")
-    public ResponseEntity<List<SinhVienDTO>> getSinhVienListByLopHoc(@PathVariable(value="id") Integer id){
+    public ResponseEntity<List<SinhVienDTO>> getSinhVienListByLopHoc(@PathVariable(value = "id") Integer id) {
         return ResponseEntity.ok(svService.getSinhVienByIdLop(id));
     }
 }

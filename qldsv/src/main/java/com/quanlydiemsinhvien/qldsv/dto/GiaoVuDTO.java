@@ -5,8 +5,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 
-@Builder
+@SuperBuilder
 @Getter
 @Setter
 @NoArgsConstructor
@@ -14,7 +15,6 @@ import lombok.Setter;
 public class GiaoVuDTO {
     private String idGiaoVu;
     private String tenGiaoVu;
-    private short gioiTinh;
+    private String gioiTinh;
     private String soDienThoai;
-    private String idTaiKhoan;
 }

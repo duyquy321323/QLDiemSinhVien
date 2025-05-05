@@ -1,39 +1,41 @@
 package com.quanlydiemsinhvien.qldsv.converter;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Map;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.quanlydiemsinhvien.qldsv.dto.GiangVienDTO;
-import com.quanlydiemsinhvien.qldsv.pojo.Giangvien;
-import com.quanlydiemsinhvien.qldsv.pojo.MonhocHocky;
-import com.quanlydiemsinhvien.qldsv.repository.GiangvienRepository;
 import com.quanlydiemsinhvien.qldsv.request.GiangvienCreateRequest;
+
+import lombok.SneakyThrows;
 
 @Component
 public class GiangVienConverter {
     @Autowired
     private ModelMapper modelMapper;
 
-    @Autowired
-    private GiangvienRepository giangvienRepository;
-
-    public GiangVienDTO giangVienToGiangVienDTO(Giangvien giangVien){
-        GiangVienDTO giangVienDTO = modelMapper.map(giangVien, GiangVienDTO.class);
-        return giangVienDTO;
+    public GiangVienDTO giangVienCreateRequestToGiangVienDTO(GiangvienCreateRequest request) {
+        return modelMapper.map(request, GiangVienDTO.class);
     }
 
-    public Giangvien giangVienCreateRequestToGiangVien(GiangvienCreateRequest request){
-        Giangvien giangvien = request.getIdGiangVien() == null? null : giangvienRepository.findById(request.getIdGiangVien()).orElse(null);
-        Set<MonhocHocky> monhocHockyList = new HashSet<>();
-        if(giangvien != null){
-            monhocHockyList = giangvien.getMonhocHockySet();
-        }
-        Giangvien newGiangvien = modelMapper.map(request, Giangvien.class);
-        newGiangvien.setMonhocHockySet(monhocHockyList);
-        return newGiangvien;
+    @SneakyThrows
+    public GiangVienDTO mapToGiangVienDTO(Map<String, Object> map) {
+        Map<String, Object> attributes = (Map<String, Object>) map.get("attributes");
+        ArrayList ngaySinhList = ((ArrayList) attributes.get("ngay_sinh"));
+        String ngaySinhStr = ngaySinhList == null || ngaySinhList.isEmpty() ? null : (String) ngaySinhList.get(0);
+        return GiangVienDTO.builder()
+                .diaChi((String) ((ArrayList) attributes.get("dia_chi")).get(0))
+                .email((String) map.get("email"))
+                .gioiTinh((String) ((ArrayList) attributes.get("gioi_tinh")).get(0))
+                .hoTen((String) ((ArrayList) attributes.get("ho_ten")).get(0))
+                .idGiangVien((String) ((ArrayList) attributes.get("ma_so")).get(0))
+                .idTaiKhoan((String) map.get("id"))
+                .ngaySinh(ngaySinhStr != null ? new SimpleDateFormat("yyyy-MM-dd").parse(ngaySinhStr) : null)
+                .soDienThoai((String) ((ArrayList) attributes.get("so_dien_thoai")).get(0))
+                .build();
     }
 }

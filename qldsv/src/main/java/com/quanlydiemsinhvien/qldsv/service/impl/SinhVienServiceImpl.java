@@ -4,16 +4,14 @@
  */
 package com.quanlydiemsinhvien.qldsv.service.impl;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.hibernate.HibernateException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,13 +20,14 @@ import com.quanlydiemsinhvien.qldsv.converter.SinhVienConverter;
 import com.quanlydiemsinhvien.qldsv.dto.SinhVienDTO;
 import com.quanlydiemsinhvien.qldsv.pojo.Diem;
 import com.quanlydiemsinhvien.qldsv.pojo.DiemMonHoc;
+import com.quanlydiemsinhvien.qldsv.pojo.Lophoc;
 import com.quanlydiemsinhvien.qldsv.pojo.MonhocHocky;
 import com.quanlydiemsinhvien.qldsv.pojo.Monhocdangky;
-import com.quanlydiemsinhvien.qldsv.pojo.Sinhvien;
 import com.quanlydiemsinhvien.qldsv.repository.DiemRepository;
+import com.quanlydiemsinhvien.qldsv.repository.LopHocRepository;
 import com.quanlydiemsinhvien.qldsv.repository.MonhocHockyRepository;
 import com.quanlydiemsinhvien.qldsv.repository.MonhocdangkyRepository;
-import com.quanlydiemsinhvien.qldsv.repository.SinhVienRepository;
+import com.quanlydiemsinhvien.qldsv.request.SinhVienCreateRequest;
 import com.quanlydiemsinhvien.qldsv.service.KeycloakUserService;
 import com.quanlydiemsinhvien.qldsv.service.SinhVienService;
 
@@ -41,15 +40,15 @@ import com.quanlydiemsinhvien.qldsv.service.SinhVienService;
 public class SinhVienServiceImpl implements SinhVienService {
 
     @Autowired
-    private SinhVienRepository sinhvienRepository;
-    
-    @Autowired
-    private  DiemRepository diemRepository;
-    
+    private DiemRepository diemRepository;
+
     @Autowired
     private MonhocHockyRepository monhocHockyRepository;
     @Autowired
     private MonhocdangkyRepository monhocdangkyRepository;
+
+    @Autowired
+    private LopHocRepository lopHocRepository;
 
     @Autowired
     private KeycloakUserService keycloakUserService;
@@ -62,71 +61,84 @@ public class SinhVienServiceImpl implements SinhVienService {
 
     @Override
     public SinhVienDTO getSinhvien(String idTaiKhoan) {
-        return sinhVienConverter.sinhVienToSinhVienDTO(sinhvienRepository.findByIdTaiKhoan(idTaiKhoan).orElseThrow(() -> new RuntimeException("Tài khoản này không phải là sinh viên!")));
+        return sinhVienConverter.sinhVienToSinhVienDTO(keycloakUserService.getUserById(idTaiKhoan));
     }
 
     @Override
-    public Page<SinhVienDTO> getSinhvienList(Map<String, String> params, int page, int pageSize) {
-        try{
-            Pageable pageable = PageRequest.of(page - 1, pageSize);
+    public List<SinhVienDTO> getSinhvienList(Map<String, String> params) {
+        try {
             String tenSV = params.get("tensv");
 
-            if(tenSV != null){
-                Page<Sinhvien> sinhVienList = sinhvienRepository.findByHoTenContaining(tenSV, pageable);
-                return sinhVienList.map(it -> it != null ? sinhVienConverter.sinhVienToSinhVienDTO(it) : null);
+            if (tenSV != null) {
+                List<Map<String, Object>> sinhVienList = keycloakUserService.getUserByFullNameAndRole(tenSV, "SV");
+                return sinhVienList.stream().map(it -> it != null ? sinhVienConverter.sinhVienToSinhVienDTO(it) : null)
+                        .collect(Collectors.toList());
             }
-            Page<Sinhvien> sinhVienList = sinhvienRepository.findAll(pageable);
-            return sinhVienList.map(it -> it != null ? sinhVienConverter.sinhVienToSinhVienDTO(it) : null);
-        } catch(Exception e){
+            List<Map<String, Object>> sinhVienList = (List<Map<String, Object>>) keycloakUserService
+                    .getUsersByRoles("SV").get("users");
+            return sinhVienList.stream().map(it -> it != null ? sinhVienConverter.sinhVienToSinhVienDTO(it) : null)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
             e.printStackTrace();
-            return null;
+            return Collections.emptyList();
         }
     }
+
     // di chuyen lay danh sach lop hoc qua class lop hoc
     @Override
-    public boolean addOrUpdateSinhVien(SinhVienDTO sv) {
+    public boolean addOrUpdateSinhVien(SinhVienCreateRequest sv) {
         try {
-            Sinhvien sinhvien = sv.getIdSinhVien() == null? null : sinhvienRepository.findById(sv.getIdSinhVien()).orElse(null);
-            if(sinhvien != null && sinhvien.getIdTaiKhoan() != null){
-                keycloakUserService.updateUser(sinhvien.getIdTaiKhoan(), sv.getEmail(), sv.getHoTen());
+            if (sv.getMatKhau() != null && (!sv.getMatKhau().equals(sv.getXacNhanMk())))
+                return false;
+            if (sv != null && !sv.getIdTaiKhoan().isBlank()) {
+                keycloakUserService.updateUser(sv.getIdTaiKhoan(), sv);
+                if(sv.getMatKhau() != null && !sv.getMatKhau().isBlank())
+                    keycloakUserService.updateUserPassword(sv.getIdTaiKhoan(), sv.getMatKhau());
+            } else if (sv != null && (sv.getIdTaiKhoan() == null || sv.getIdTaiKhoan().isBlank())) {
+                if(sv.getMatKhau() == null || sv.getMatKhau().isBlank())
+                    return false;
+                String keycloakUserId = keycloakUserService
+                        .createUserInKeycloak(sinhVienConverter.sinhVienRequestToSinhVienDTO(sv));
+                keycloakUserService.updateUserPassword(keycloakUserId, sv.getMatKhau());
             }
-            sinhvienRepository.save(sinhVienConverter.sinhVienDTOToSinhVien(sv));
             return true;
-        } catch (HibernateException e) {
+        } catch (Exception e) {
             e.printStackTrace();
+            return false;
         }
-        return false;
     }
 
     @Override
-    public SinhVienDTO getSinhVienById(Integer idSinhVien) {
-        return sinhVienConverter.sinhVienToSinhVienDTO(sinhvienRepository.findById(idSinhVien).orElse(null));
+    public SinhVienDTO getSinhVienById(String idSinhVien) {
+        return sinhVienConverter.sinhVienToSinhVienDTO(keycloakUserService.getUserById(idSinhVien));
     }
 
-//    xoa sinh vien voi khoa ngoai
+    // xoa sinh vien voi khoa ngoai
     @Override
-    public boolean deleteById(Integer idSinhVien) {
-        try{
-            Sinhvien sinhvien = sinhvienRepository.findById(idSinhVien).orElse(null);
-            if(sinhvien != null && sinhvien.getIdTaiKhoan() != null){
-                keycloakUserService.deleteUser(sinhvien.getIdTaiKhoan());
-            }
-            sinhvienRepository.deleteById(idSinhVien);
+    public boolean deleteById(String idSinhVien) {
+        try {
+
+            keycloakUserService.deleteUser(idSinhVien);
         } catch (Exception e) {
             e.printStackTrace();
             return false;
         }
         return true;
     }
+
     @Override
     public List<DiemMonHoc> getSinhvienByMonHoc(Map<String, String> params) {
         String idMonHoc = params.get("monHocId");
         String tenSinhVien = params.get("tenSinhVien");
-        MonhocHocky monhocHocky = monhocHockyRepository.findById(Integer.parseInt(idMonHoc)).orElseThrow(() -> new RuntimeException("Môn học học kỳ không tồn tại!"));
+        MonhocHocky monhocHocky = monhocHockyRepository.findById(Integer.parseInt(idMonHoc))
+                .orElseThrow(() -> new RuntimeException("Môn học học kỳ không tồn tại!"));
         List<Monhocdangky> monhocdangkyList = new ArrayList<>();
-        if(tenSinhVien != null){
-            Sinhvien sinhvien = sinhvienRepository.findByHoTen(tenSinhVien).orElseThrow(() -> new RuntimeException("Sinh viên không tồn tại!"));
-            Monhocdangky monhocdangky = monhocdangkyRepository.findByIdSinhVienAndIdMonHoc(sinhvien, monhocHocky).orElseThrow(() -> new RuntimeException("Môn học đăng ký không tồn tại!"));
+        if (tenSinhVien != null) {
+            List<Map<String, Object>> sinhvienList = keycloakUserService.getUserByFullNameAndRole(tenSinhVien, "SV");
+            Map<String, Object> sinhvien = sinhvienList.isEmpty() ? null : sinhvienList.getFirst();
+            Monhocdangky monhocdangky = monhocdangkyRepository
+                    .findByIdSinhVienAndIdMonHoc((String) sinhvien.get("id"), monhocHocky)
+                    .orElseThrow(() -> new RuntimeException("Môn học đăng ký không tồn tại!"));
             monhocdangkyList.add(monhocdangky);
         } else {
             monhocdangkyList.addAll(monhocdangkyRepository.findByIdMonHoc(monhocHocky));
@@ -134,8 +146,9 @@ public class SinhVienServiceImpl implements SinhVienService {
 
         List<DiemMonHoc> monHocDiemList = new ArrayList<>();
 
-       for (Monhocdangky monHoc : monhocdangkyList) {
-            DiemMonHoc monHocDiem = DiemMonHoc.fromMonHocDangKy(monHocDangKyConverter.monhocdangkyToMonhocdangkyDTO(monHoc));
+        for (Monhocdangky monHoc : monhocdangkyList) {
+            DiemMonHoc monHocDiem = DiemMonHoc
+                    .fromMonHocDangKy(monHocDangKyConverter.monhocdangkyToMonhocdangkyDTO(monHoc));
             // Lấy danh sách điểm cho môn học cụ thể
             List<Diem> diemList = diemRepository.findByIdMonHoc(monHoc);
             // Thêm điểm vào danh sách MonHocDiem
@@ -144,21 +157,22 @@ public class SinhVienServiceImpl implements SinhVienService {
             }
             // Thêm MonHocDiem vào danh sách chung
             monHocDiemList.add(monHocDiem);
-       }
+        }
         return monHocDiemList;
     }
-    
+
     // dem sv
     @Override
     public Long countSinhVien() {
-        return this.sinhvienRepository.count();
+        return (Long) keycloakUserService.getUsersByRoles("SV").get("total");
     }
 
-    //update 26/9 danh sach sinh vien theo ma lop
+    // update 26/9 danh sach sinh vien theo ma lop
     @Override
     public List<SinhVienDTO> getSinhVienByIdLop(int idLop) {
         try {
-            return sinhvienRepository.findByMaLop_IdLopHoc(idLop).stream().map(it -> sinhVienConverter.sinhVienToSinhVienDTO(it)).collect(Collectors.toList());
+            return keycloakUserService.getSinhVienByIdLop(idLop).stream()
+                    .map(it -> sinhVienConverter.sinhVienToSinhVienDTO(it)).collect(Collectors.toList());
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -166,10 +180,17 @@ public class SinhVienServiceImpl implements SinhVienService {
     }
 
     @Override
-    public Object getSinhVienByIdAPI(Integer idSinhVien) {
+    public Object getSinhVienByIdAPI(String idSinhVien) {
         try {
-            Sinhvien sinhvien = sinhvienRepository.findById(idSinhVien).orElseThrow(() -> new RuntimeException("Sinh viên không tồn tại!"));
-            return new Object[]{sinhvien.getHoTen(), sinhvien.getIdSinhVien(), sinhvien.getNgaySinh(), sinhvien.getMaLop().getTenLopHoc(), sinhvien.getMaLop().getIdNganh().getTenNganhDaoTao(), sinhvien.getDiaChi(), sinhvien.getEmail()};
+            Map<String, Object> sinhvien = keycloakUserService.getUserById(idSinhVien);
+            Map<String, Object> attributes = (Map<String, Object>) sinhvien.get("attributes");
+            Lophoc lophoc = lopHocRepository
+                    .findById(Integer.valueOf((String) ((ArrayList) attributes.get("id_lop_hoc")).get(0))).get();
+            String ngaySinhStr = (String) ((ArrayList) attributes.get("ngay_sinh")).get(0);
+            return new Object[] { (String) ((ArrayList) attributes.get("ho_ten")).get(0), (String) ((ArrayList) attributes.get("ma_so")).get(0),
+                    new SimpleDateFormat("yyyy-MM-dd").parse(ngaySinhStr), lophoc.getTenLopHoc(),
+                    lophoc.getIdNganh().getTenNganhDaoTao(),
+                    (String) ((ArrayList) attributes.get("dia_chi")).get(0), (String) sinhvien.get("email") };
         } catch (Exception ex) {
             ex.printStackTrace();
             return null;

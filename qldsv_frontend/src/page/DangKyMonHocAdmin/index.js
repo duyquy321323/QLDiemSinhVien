@@ -48,7 +48,7 @@ const DangKiMonHoc = () => {
   async function fetchGiangVien(){
     try{
         const response = await api().get(`/giaovu/giangvien`);
-        setGiangvien(response.data.content);
+        setGiangvien(response.data);
     } catch (e) {
         console.error(e);
     }
@@ -89,7 +89,7 @@ const DangKiMonHoc = () => {
       setValue(`ngayBatDau_${item.idMonHoc.idMonHoc}`, startDate.format("YYYY-MM-DD"));
       setValue(`ngayKetThuc_${item.idMonHoc.idMonHoc}`, endDate.format("YYYY-MM-DD"));
       setValue(`phongHoc_${item.idMonHoc.idMonHoc}`, item.phongHoc?.idPhongHoc || "");
-      setValue(`giangVien_${item.idMonHoc.idMonHoc}`, item.idGiangVien?.idGiangVien || "");
+      setValue(`giangVien_${item.idMonHoc.idMonHoc}`, item.idGiangVien?.idTaiKhoan || "");
     });
   
     setCheckedSubjects(initialCheckedState);
@@ -171,7 +171,7 @@ const DangKiMonHoc = () => {
               <Controller
                 name={`idMonHocHocKy_${mh.idMonHoc}`}
                 control={control}
-                defaultValue={mondachon.find(item => {
+                defaultValue={mondachon?.find(item => {
                   return item.idMonHoc.idMonHoc === mh.idMonHoc
                 })?.idMonHocHocKy || ""}
                 render={({ field }) => <input type="hidden" {...field} />}
@@ -239,8 +239,8 @@ const DangKiMonHoc = () => {
                     render={({ field }) => (
                       <Select {...field} required={checkedSubjects[mh.idMonHoc] || false} // Required nếu checked
                       disabled={!checkedSubjects[mh.idMonHoc] || disabledSubjects[mh.idMonHoc]}>
-                        {giangvien.map((gv) => (
-                          <MenuItem key={gv.idGiangVien} value={gv.idGiangVien}>{gv.hoTen}</MenuItem>
+                        {giangvien?.map((gv) => (
+                          <MenuItem key={gv.idGiangVien} value={gv.idTaiKhoan}>{gv.hoTen}</MenuItem>
                         ))}
                       </Select>
                     )}

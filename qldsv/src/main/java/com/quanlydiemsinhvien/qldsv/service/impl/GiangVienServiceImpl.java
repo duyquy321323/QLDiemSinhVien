@@ -5,21 +5,18 @@
 package com.quanlydiemsinhvien.qldsv.service.impl;
 
 import java.security.Principal;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.quanlydiemsinhvien.qldsv.converter.GiangVienConverter;
 import com.quanlydiemsinhvien.qldsv.dto.GiangVienDTO;
-import com.quanlydiemsinhvien.qldsv.pojo.Giangvien;
-import com.quanlydiemsinhvien.qldsv.repository.GiangvienRepository;
+import com.quanlydiemsinhvien.qldsv.request.GiangvienCreateRequest;
 import com.quanlydiemsinhvien.qldsv.service.GiangVienService;
 import com.quanlydiemsinhvien.qldsv.service.KeycloakUserService;
 
@@ -32,79 +29,73 @@ import com.quanlydiemsinhvien.qldsv.service.KeycloakUserService;
 public class GiangVienServiceImpl implements GiangVienService {
 
     @Autowired
-    private GiangvienRepository giangVienRepository;
-
-    @Autowired
     private KeycloakUserService keycloakUserService;
-    
+
     @Autowired
     private GiangVienConverter giangVienConverter;
 
     @Override
-    public Page<GiangVienDTO> getGiangvienList(Map<String, String> params, int page, int pageSize) {
-        try{
-            Pageable pageable = PageRequest.of(page - 1, pageSize);
+    public List<GiangVienDTO> getGiangvienList(Map<String, String> params) {
+        try {
             String tenGV = params.get("tenGV");
 
-            if(tenGV != null){
-                Page<Giangvien> giangVienList = giangVienRepository.findByHoTenContaining(tenGV, pageable);
-                return giangVienList.map(it -> it != null ? giangVienConverter.giangVienToGiangVienDTO(it) : null);
+            if (tenGV != null) {
+                List<Map<String, Object>> giangVienList = keycloakUserService.getUserByFullNameAndRole(tenGV, "GV");
+                return giangVienList.stream().map(it -> giangVienConverter.mapToGiangVienDTO(it))
+                        .collect(Collectors.toList());
             }
-            Page<Giangvien> giangVienList = giangVienRepository.findAll(pageable);
-            return giangVienList.map(it -> it != null ? giangVienConverter.giangVienToGiangVienDTO(it) : null);
-        } catch(Exception e){
+            List<Map<String, Object>> giangVienList = (List<Map<String, Object>>) keycloakUserService
+                    .getUsersByRoles("GV").get("users");
+            return giangVienList.stream().map(it -> giangVienConverter.mapToGiangVienDTO(it))
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
             e.printStackTrace();
-            return null;
+            return Collections.emptyList();
         }
     }
 
     @Override
-    public boolean addOrUpdateGiangVien(Giangvien gv, Principal principal) {
-        try{
-            giangVienRepository.save(gv);
-            if(gv != null && gv.getIdTaiKhoan() != null){
-                keycloakUserService.updateUser(principal.getName(), gv.getEmail(), gv.getHoTen());
+    public boolean addOrUpdateGiangVien(GiangvienCreateRequest gv, Principal principal) {
+        try {
+            if (gv.getMatKhau() != null && (!gv.getMatKhau().equals(gv.getXacNhanMk())))
+                return false;
+            if (gv != null && !gv.getIdTaiKhoan().isBlank()) {
+                keycloakUserService.updateUser(gv.getIdTaiKhoan(), gv);
+                if (gv.getMatKhau() != null && !gv.getMatKhau().isBlank())
+                    keycloakUserService.updateUserPassword(gv.getIdTaiKhoan(), gv.getMatKhau());
+            } else if (gv != null && (gv.getIdTaiKhoan() == null || gv.getIdTaiKhoan().isBlank())) {
+                if (gv.getMatKhau() == null || gv.getMatKhau().isBlank())
+                    return false;
+                String keycloakUserId = keycloakUserService
+                        .createUserInKeycloak(giangVienConverter.giangVienCreateRequestToGiangVienDTO(gv));
+                keycloakUserService.updateUserPassword(keycloakUserId, gv.getMatKhau());
             }
             return true;
-        } catch(Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return false;
         }
     }
 
     @Override
-    public GiangVienDTO getGiangVienById(Integer idGiangVien) {
-        return giangVienConverter.giangVienToGiangVienDTO(giangVienRepository.findById(idGiangVien).orElseThrow(() -> new RuntimeException("Giảng viên không tồn tại!")));
+    public GiangVienDTO getGiangVienById(String idGiangVien) {
+        Map<String, Object> gv = (Map<String, Object>) keycloakUserService.getUserById(idGiangVien);
+        return giangVienConverter.mapToGiangVienDTO(gv);
     }
-    
+
     @Override
-    public boolean deleteById(Integer idGiangVien) {
+    public boolean deleteById(String idGiangVien) {
         try {
-            Giangvien giangvien = giangVienRepository.findById(idGiangVien).orElse(null);
-            if(giangvien != null && giangvien.getIdTaiKhoan() != null){
-                keycloakUserService.deleteUser(giangvien.getIdTaiKhoan());
-            }
-            giangVienRepository.deleteGiangVienById(idGiangVien);
+            keycloakUserService.deleteUser(idGiangVien);
             return true;
         } catch (Exception e) {
             System.out.println("Error deleting GiangVien with id: " + idGiangVien);
             return false;
         }
     }
-    
-    @Override
-    public GiangVienDTO getGiangVienByIdTaiKhoan(String idTaiKhoan) {
-        return giangVienConverter.giangVienToGiangVienDTO(giangVienRepository.findByIdTaiKhoan(idTaiKhoan).orElseThrow(() -> new RuntimeException("Tài khoản này không phải là giảng viên!")));
-    }
-
 
     @Override
     public long countGiangVien() {
-        return this.giangVienRepository.count();
-    }
-
-    @Override
-    public List<GiangVienDTO> getGiangvienCCTKList() {
-        return giangVienRepository.findAll().stream().filter(it -> it.getIdTaiKhoan() == null).map(it -> giangVienConverter.giangVienToGiangVienDTO(it)).collect(Collectors.toList());
+        return (Long) keycloakUserService.getUsersByRoles("GV").get("total");
     }
 }

@@ -39,6 +39,8 @@ const ChiTietSinhVien = () => {
         loadloadDSDiem();
     }, [allowEdit]);
 
+    console.log(sinhVien)
+
     function handChange(e){
         const { name, value } = e.target;
         const words = name.split(" ");

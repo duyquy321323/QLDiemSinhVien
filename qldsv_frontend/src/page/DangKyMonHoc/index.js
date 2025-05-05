@@ -2,6 +2,7 @@ import dayjs from 'dayjs';
 import { useEffect, useState } from "react";
 import { Button, Form, InputGroup } from "react-bootstrap";
 import { useSelector } from 'react-redux';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { api, endpoints } from "../../api";
 
 function formatDate(date) {
@@ -45,7 +46,7 @@ const DangKyMonHoc = () => {
     try {
       //láy danh sách môn học sinh viene đangư ký
       let a = endpoints["listMonHocSVDangKy"];
-      a = `${a}?idSinhVien=${sinhvien.idSinhVien}`;
+      a = `${a}?idSinhVien=${sinhvien.idTaiKhoan}`;
       let res2 = await api().get(a);
       setMonHocDangKy(res2.data);
     } catch (ex) {
@@ -57,10 +58,10 @@ const DangKyMonHoc = () => {
     evt.preventDefault();
     const process = async () => {
       let e = endpoints["dangKyMonHoc"];
-      e = `${e}?IdSinhVien=${sinhvien.idSinhVien}&IdMonHoc=${idMonHoc}`;
+      e = `${e}?IdSinhVien=${sinhvien.idTaiKhoan}&IdMonHoc=${idMonHoc}`;
       let res = await api().post(e, {
         idMonHoc: idMonHoc,
-        idSinhVien: sinhvien.idSinhVien,
+        idSinhVien: sinhvien.idTaiKhoan,
       });
       e = endpoints["getMonHocById"] + `?idMonHocHocKy=${idMonHoc}`;
       await api().get(e);
@@ -77,7 +78,7 @@ const DangKyMonHoc = () => {
     evt.preventDefault();
     const process = async () => {
       let e = endpoints["huyDangKyMonHoc"];
-      e = `${e}?IdSinhVien=${sinhvien.idSinhVien}&IdMonHoc=${idMonHoc}`;
+      e = `${e}?IdSinhVien=${sinhvien.idTaiKhoan}&IdMonHoc=${idMonHoc}`;
       let res = await api().delete(e);
 
       setSuccess(true);
@@ -107,8 +108,39 @@ const DangKyMonHoc = () => {
     }
   };
 
-  console.log(DSmonHocDangKy);
-  console.log(DSmonHocHocKy);
+  const location = useLocation();
+  const [refresh, setRefresh] = useState(false);
+
+  useEffect(() => {
+    const query = new URLSearchParams(location.search);
+    const vnp_ResponseCode = query.get("vnp_ResponseCode");
+
+    if (vnp_ResponseCode === "00") {
+      const order_id = query.get("vnp_TxnRef"); // vnp_TxnRef là order_id
+      const transactionNo = query.get("vnp_TransactionNo");
+      const trans_date = query.get("vnp_PayDate");
+
+      const payload = {
+        order_id,
+        transactionNo,
+        trans_date,
+        idSinhVien: sinhvien.idTaiKhoan,
+      };
+
+      api().post("/api/queryTransactionStatus/", null, {
+        params: payload
+      })
+      .then(res => {
+        console.log("Kết quả:", res.data);
+        // Hiển thị thông báo thành công, chuyển hướng...
+        window.location.href = "/dangkymonhoc";
+        setRefresh(prev => !prev);
+      })
+      .catch(err => {
+        console.error("Lỗi khi gọi xác nhận:", err);
+      });
+    }
+  }, [location.search]);
 
   return (
     <>

@@ -58,9 +58,7 @@ public class Monhocdangky implements Serializable {
     @ManyToOne
     private MonhocHocky idMonHoc;
 
-    @JoinColumn(nullable = false)
-    @ManyToOne
-    private Sinhvien idSinhVien;
+    private String idSinhVien;
 
     @Override
     public int hashCode() {
@@ -76,7 +74,8 @@ public class Monhocdangky implements Serializable {
             return false;
         }
         Monhocdangky other = (Monhocdangky) object;
-        if ((this.idMonHocDangKy == null && other.idMonHocDangKy != null) || (this.idMonHocDangKy != null && !this.idMonHocDangKy.equals(other.idMonHocDangKy))) {
+        if ((this.idMonHocDangKy == null && other.idMonHocDangKy != null)
+                || (this.idMonHocDangKy != null && !this.idMonHocDangKy.equals(other.idMonHocDangKy))) {
             return false;
         }
         return true;

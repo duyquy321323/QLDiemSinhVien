@@ -137,7 +137,7 @@ const DanhSachSinhVien = () => {
                 </thead>
                 <tbody>
                   {DSSinhVien.map((sv) => {
-                    let h = `/chitietsinhvien/?idSinhVien=${sv.monHoc.idSinhVien.idSinhVien}`;
+                    let h = `/chitietsinhvien/?idSinhVien=${sv.monHoc.idSinhVien.idTaiKhoan}`;
 
                     return (
                       <tr key={sv.idMonHocDangKy}>

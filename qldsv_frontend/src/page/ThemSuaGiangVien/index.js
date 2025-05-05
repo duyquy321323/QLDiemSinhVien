@@ -24,6 +24,7 @@ const ThemSuaGiangVien = () => {
 
     const [formData, setFormData] = useState({
         idGiangVien: student?.idGiangVien || "",
+        idTaiKhoan: student?.idTaiKhoan || "",
         hoTen: student?.hoTen || "",
         ngaySinh: student?.ngaySinh || "",
         diaChi: student?.diaChi || "",
@@ -36,6 +37,7 @@ const ThemSuaGiangVien = () => {
         setFormData(prev => ({
             ...prev,
             idGiangVien: student?.idGiangVien || "",
+            idTaiKhoan: student?.idTaiKhoan || "",
             hoTen: student?.hoTen || "",
             ngaySinh: dayjs(student?.ngaySinh).format("YYYY-MM-DD") || "",
             diaChi: student?.diaChi || "",
@@ -69,6 +71,7 @@ const ThemSuaGiangVien = () => {
                 <div className="text-form-addSV">
                     <form onSubmit={handleSubmit}>
                         <input type="hidden" name="idGiangVien" value={formData.idGiangVien} />
+                        <input type="hidden" name="idTaiKhoan" value={formData.idTaiKhoan} />
                         <div className="form-floating mb-3 mt-3">
                             <input type="text" className="form-control" name="hoTen" id="name" placeholder="Họ và tên" value={formData.hoTen} onChange={handleChange} required />
                             <label htmlFor="name">Họ và tên</label>
@@ -84,8 +87,8 @@ const ThemSuaGiangVien = () => {
                         <div className="form-floating mt-3 mb-3">
                             <select className="form-select" name="gioiTinh" id="sex" value={formData.gioiTinh} onChange={handleChange} required>
                                 <option value="-1">Chọn giới tính</option>
-                                <option value="1">Nam</option>
-                                <option value="0">Nữ</option>
+                                <option value="Nam">Nam</option>
+                                <option value="Nữ">Nữ</option>
                             </select>
                             <label htmlFor="sex">Giới tính</label>
                         </div>
@@ -96,6 +99,14 @@ const ThemSuaGiangVien = () => {
                         <div className="form-floating mt-3 mb-3">
                             <input type="email" className="form-control" name="email" id="email" placeholder="Email" value={formData.email} onChange={handleChange} required />
                             <label htmlFor="email">Email</label>
+                        </div>
+                        <div className="form-floating mt-3 mb-3">
+                            <input type="password" className="form-control" name="matKhau" id="password" placeholder="Mật khẩu" value={formData?.matKhau} onChange={handleChange} />
+                            <label htmlFor="password">Mật khẩu</label>
+                        </div>
+                        <div className="form-floating mt-3 mb-3">
+                            <input type="password" className="form-control" name="xacNhanMk" id="confirmPassword" placeholder="Xác nhận mật khẩu" value={formData?.xacNhanMk} onChange={handleChange} />
+                            <label htmlFor="confirmPassword">Xác nhận mật khẩu</label>
                         </div>
                         <div className="btn-form-addsv">
                             <button className="btn input-form-addsv" style={{background: 'green', color: 'white'}} type="submit">

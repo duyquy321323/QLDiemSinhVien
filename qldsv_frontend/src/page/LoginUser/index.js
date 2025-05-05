@@ -99,22 +99,6 @@ const Login = () => {
             ) : (
               <div></div>
             )}
-            <div>
-              <hr width="100%" size="3px" align="center" color="#9C9C9C" />
-              <div className="btn-submit">
-                <p>
-                  Sinh viên chưa có tài khoản <Link to="/signup-user">Đăng Ký</Link>{" "}
-                </p>
-              </div>
-            </div>
-            <div>
-              <p>Nếu sinh viên lần đầu đăng nhập:</p>
-              <p className="text-content">
-                Vui lòng chọn đăng ký, và đăng kí tài khoản bằng email trường
-                cung cấp để có thể truy cập, trong trường hợp quên mật khẩu đăng
-                nhập, vui lòng liên hệ phòng quản lý sinh viên để được hỗ trợ.{" "}
-              </p>
-            </div>
           </Form>
         </div>
       </div>

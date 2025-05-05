@@ -61,9 +61,6 @@ public class Lophoc implements Serializable {
     @ManyToOne
     private Nganhdaotao idNganh;
 
-    @OneToMany(mappedBy = "maLop", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Sinhvien> sinhvienSet;
-
     @Override
     public int hashCode() {
         int hash = 0;
@@ -78,7 +75,8 @@ public class Lophoc implements Serializable {
             return false;
         }
         Lophoc other = (Lophoc) object;
-        if ((this.idLopHoc == null && other.idLopHoc != null) || (this.idLopHoc != null && !this.idLopHoc.equals(other.idLopHoc))) {
+        if ((this.idLopHoc == null && other.idLopHoc != null)
+                || (this.idLopHoc != null && !this.idLopHoc.equals(other.idLopHoc))) {
             return false;
         }
         return true;

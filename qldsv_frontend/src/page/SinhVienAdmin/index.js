@@ -49,7 +49,7 @@ const SinhVienAdmin = () => {
   const fetchStudents = async () => {
     try {
       const response = await api().get("/giaovu/sinhvien");
-      setStudents(response.data.content);
+      setStudents(response.data);
     } catch (error) {
       console.error("Error fetching students:", error);
     }
@@ -59,7 +59,7 @@ const SinhVienAdmin = () => {
     if (window.confirm("Bạn có chắc muốn xóa sinh viên này?")) {
       try {
         await api().delete(`/giaovu/sinhvien/add/${id}`);
-        setStudents(students.filter((sv) => sv.idSinhVien !== id));
+        setStudents(students.filter((sv) => sv.idTaiKhoan !== id));
       } catch (error) {
         console.error("Error deleting student:", error);
       }
@@ -130,13 +130,13 @@ const SinhVienAdmin = () => {
                   <StyledTableCell align="right">{row.email}</StyledTableCell>
                   <StyledTableCell align="center">
                     <Link
-                      to={`/giaovu/them-suasinhvien/${row.idSinhVien}`}
+                      to={`/giaovu/them-suasinhvien/${row.idTaiKhoan}`}
                       className="btn btn-warning me-2"
                     >
                       <FaEdit size={20} />
                     </Link>
                     <button
-                      onClick={() => handleDelete(row.idSinhVien)}
+                      onClick={() => handleDelete(row.idTaiKhoan)}
                       className="btn btn-danger"
                     >
                       <FaTrashAlt size={20} />

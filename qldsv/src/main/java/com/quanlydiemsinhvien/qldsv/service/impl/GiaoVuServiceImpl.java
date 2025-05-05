@@ -12,9 +12,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.quanlydiemsinhvien.qldsv.converter.GiaoVuConverter;
 import com.quanlydiemsinhvien.qldsv.dto.GiaoVuDTO;
-import com.quanlydiemsinhvien.qldsv.pojo.Taikhoan;
-import com.quanlydiemsinhvien.qldsv.repository.GiaoVuRepository;
 import com.quanlydiemsinhvien.qldsv.service.GiaoVuService;
+import com.quanlydiemsinhvien.qldsv.service.KeycloakUserService;
 
 /**
  *
@@ -22,18 +21,18 @@ import com.quanlydiemsinhvien.qldsv.service.GiaoVuService;
  */
 @Service
 @Transactional
-public class GiaoVuServiceImpl implements GiaoVuService{
-
-    @Autowired
-    private GiaoVuRepository giaoVuRepository;
+public class GiaoVuServiceImpl implements GiaoVuService {
 
     @Autowired
     private GiaoVuConverter giaoVuConverter;
 
+    @Autowired
+    private KeycloakUserService keycloakUserService;
+
     @Override
     public GiaoVuDTO getGiaoVu(Principal auth) {
         String id = auth.getName();
-        return giaoVuConverter.giaoVuToGiaoVuDTO(giaoVuRepository.findByIdTaiKhoan(id).orElseThrow(() -> new RuntimeException("Tài khoản này không phải là giáo vụ")));
+        return giaoVuConverter.giaoVuToGiaoVuDTO(keycloakUserService.getUserById(id));
     }
-    
+
 }

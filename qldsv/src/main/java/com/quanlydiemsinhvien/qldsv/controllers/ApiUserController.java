@@ -50,18 +50,6 @@ public class ApiUserController {
                 .body(tkService.login(user));
     }
 
-    @PostMapping(path = "/users/",
-            consumes = {MediaType.MULTIPART_FORM_DATA_VALUE},
-            produces = {MediaType.APPLICATION_JSON_VALUE})
-    @CrossOrigin
-    public ResponseEntity<String> addUser(@RequestParam Map<String, String> params) {
-        if (this.tkService.createTKSinhVien(params)) {
-            return new ResponseEntity<>("Successfull", HttpStatus.OK);
-        }
-        return new ResponseEntity<>("error", HttpStatus.INTERNAL_SERVER_ERROR);
-
-    }
-
     @PostMapping("/change-password/")
     @CrossOrigin
     public ResponseEntity<?> changePassword(@RequestParam Map<String, String> params, Principal principal) {
@@ -86,28 +74,11 @@ public class ApiUserController {
         return new ResponseEntity<>(sv, HttpStatus.OK);
     }
 
-    // @PostMapping(path = "/change-avt/", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE},
-    //         produces = {MediaType.APPLICATION_JSON_VALUE})
-    // @CrossOrigin
-    // public ResponseEntity<Taikhoan> updateAVT(@RequestParam Map<String, String> params, @RequestPart MultipartFile avatar) {
-    //     Taikhoan user = this.tkService.updateImg(params, avatar);
-    //     return new ResponseEntity<>(user, HttpStatus.OK);
-    // }
-
     @GetMapping(path = "/current-user-gv/", produces = MediaType.APPLICATION_JSON_VALUE)
     @CrossOrigin
     public ResponseEntity<GiangVienDTO> detailsgiangvien(Principal user) {
-        GiangVienDTO gv = this.gvService.getGiangVienByIdTaiKhoan(user.getName());
+        GiangVienDTO gv = this.gvService.getGiangVienById(user.getName());
         return new ResponseEntity<>(gv, HttpStatus.OK);
-    }
-
-    @PostMapping("/send-code/")
-    @CrossOrigin
-    public ResponseEntity<String> sendCode(@RequestParam Map<String, String> params) {
-        if (this.tkService.sendCode(params.get("email"))) {
-            return new ResponseEntity<>("sucessful", HttpStatus.OK);
-        }
-        return new ResponseEntity<>("fail", HttpStatus.CREATED);
     }
 
     @GetMapping("/SinhVien-Id/")
@@ -115,7 +86,7 @@ public class ApiUserController {
     public ResponseEntity<Object> getSVBYID(@RequestParam Map<String, String> params) {
         String idSinhVien = params.get("idSinhVien");
 
-        return new ResponseEntity<>(this.sinhvienService.getSinhVienByIdAPI(Integer.valueOf(idSinhVien)), HttpStatus.OK);
+        return new ResponseEntity<>(this.sinhvienService.getSinhVienByIdAPI(idSinhVien), HttpStatus.OK);
     }
 
     @PostMapping("/logout")

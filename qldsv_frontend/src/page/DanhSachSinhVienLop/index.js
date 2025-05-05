@@ -1,13 +1,13 @@
 import {
-  Pagination, Paper,
-  styled,
-  Table,
-  TableBody,
-  TableCell,
-  tableCellClasses,
-  TableContainer,
-  TableHead,
-  TableRow
+    Pagination, Paper,
+    styled,
+    Table,
+    TableBody,
+    TableCell,
+    tableCellClasses,
+    TableContainer,
+    TableHead,
+    TableRow
 } from "@mui/material";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { useEffect, useState } from "react";
@@ -115,7 +115,7 @@ import { api } from "../../api";
                     </StyledTableCell>
                     <StyledTableCell align="center">
                       <Link
-                        to={`/giaovu/chitietsinhvien/${row.idSinhVien}`}
+                        to={`/giaovu/chitietsinhvien/${row.idTaiKhoan}`}
                         className="btn btn-warning me-2"
                       >
                         <FaEdit size={20} />

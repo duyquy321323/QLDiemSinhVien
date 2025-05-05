@@ -49,7 +49,7 @@ const Header = () => {
                        
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle dark-color" href="#" role="button" data-bs-toggle="dropdown">Chào,
-                                {user === null ? "" : user.tenTaiKhoan}</a>
+                                {user === null ? "" : user.attributes?.ho_ten}</a>
                             <ul class="dropdown-menu">
                                 <li><a class="dropdown-item dark-color " href="#"><i class="fa-solid fa-user icon-padding"></i>Thông Tin Tài Khoản</a></li>
                                 <li><a class="dropdown-item dark-color" href="#"><i class="fa-solid fa-key icon-padding"></i>Thay Đổi Mật Khẩu</a></li>

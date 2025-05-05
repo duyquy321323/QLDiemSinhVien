@@ -46,14 +46,13 @@ import { api } from "../../api";
         try {
           const response = await api().get("/giaovu/taikhoan");
           setStudents(response.data);
-          console.log(response.data);
         } catch (error) {
           console.error("Error fetching students:", error);
         }
       };
     
       const filteredStudents = students.filter((sv) =>
-        sv?.firstName?.toLowerCase().includes(search.toLowerCase())
+        sv?.attributes?.ho_ten[0]?.toLowerCase().includes(search.toLowerCase())
       );
     
       const totalPages = Math.ceil(filteredStudents.length / itemsPerPage);

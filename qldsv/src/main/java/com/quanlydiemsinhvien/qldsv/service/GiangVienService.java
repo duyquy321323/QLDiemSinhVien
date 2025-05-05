@@ -8,21 +8,21 @@ import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.data.domain.Page;
-
 import com.quanlydiemsinhvien.qldsv.dto.GiangVienDTO;
-import com.quanlydiemsinhvien.qldsv.pojo.Giangvien;
+import com.quanlydiemsinhvien.qldsv.request.GiangvienCreateRequest;
 
 /**
  *
  * @author FPTSHOP
  */
 public interface GiangVienService {
-    Page<GiangVienDTO> getGiangvienList(Map<String, String> params, int page, int pageSize);
-    boolean addOrUpdateGiangVien(Giangvien gv, Principal principal);
-    GiangVienDTO getGiangVienById(Integer idGiangVien);
-    boolean deleteById(Integer idGiangVien);
-    GiangVienDTO getGiangVienByIdTaiKhoan(String idTaiKhoan);
-    List<GiangVienDTO> getGiangvienCCTKList();
+    List<GiangVienDTO> getGiangvienList(Map<String, String> params);
+
+    boolean addOrUpdateGiangVien(GiangvienCreateRequest gv, Principal principal);
+
+    GiangVienDTO getGiangVienById(String idGiangVien);
+
+    boolean deleteById(String idGiangVien);
+
     long countGiangVien();
 }

@@ -28,6 +28,7 @@ const NhapDiem = () => {
   const [diems, setsetDiems] = useState({
     idMonHoc: "",
   });
+  console.log(DSSinhVien)
   useEffect(() => {
     setChotDiem(false);
     setSuccess(false);
@@ -67,7 +68,7 @@ const NhapDiem = () => {
       }
     };
     loadSv();
-  }, [q, ChotDiem, success, DSSinhVien]);
+  }, [q, ChotDiem, success]);
 
   ///tìm kiếm sinhvien
   const search = (evt) => {
@@ -288,7 +289,7 @@ const NhapDiem = () => {
                             {sv.diemKT1 === -1 ? <></> : <td>{sv.diemKT1}</td>}
                             {sv.diemKT2 === -1 ? <></> : <td>{sv.diemKT2}</td>}
                             {sv.diemKT3 === -1 ? <></> : <td>{sv.diemKT2}</td>}
-                            {sv.diemGK !== -1 ? (
+                            {!isNaN(sv.diemGK)? (
                               <td>{parseFloat(sv.diemGK).toFixed(2)}</td>
                             ) : (
                               <td>-</td>

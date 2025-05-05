@@ -15,7 +15,7 @@ import lombok.Setter;
 @NoArgsConstructor
 public class MonHocHocKyCreateRequest {
     private Integer idMonHocHocKy;
-    private Integer giangVien;
+    private String giangVien;
     private Integer idMonHoc;
     private Date ngayBatDau;
     private Date ngayKetThuc;
